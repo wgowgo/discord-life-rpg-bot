@@ -16,7 +16,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('상점')
-                .setDescription('낚시대 상점을 확인합니다'))
+                .setDescription('낚시대 상점을 확인합니다 (누구나 사용 가능)'))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('구매')

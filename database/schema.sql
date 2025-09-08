@@ -1,4 +1,4 @@
- 요그리고 ㅏ-- 플레이어 기본 정보
+-- 플레이어 기본 정보
 CREATE TABLE IF NOT EXISTS players (
     id TEXT PRIMARY KEY,
     username TEXT NOT NULL,
@@ -339,6 +339,24 @@ CREATE TABLE IF NOT EXISTS gambling_records (
 CREATE TABLE IF NOT EXISTS job_cooldowns (
     player_id TEXT PRIMARY KEY,
     quit_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (player_id) REFERENCES players(id)
+);
+
+-- 플레이어 도구
+CREATE TABLE IF NOT EXISTS player_tools (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    player_id TEXT,
+    tool_id TEXT,
+    durability INTEGER,
+    FOREIGN KEY (player_id) REFERENCES players(id)
+);
+
+-- 플레이어 인벤토리
+CREATE TABLE IF NOT EXISTS player_inventory (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    player_id TEXT,
+    item_id TEXT,
+    quantity INTEGER DEFAULT 0,
     FOREIGN KEY (player_id) REFERENCES players(id)
 );
 

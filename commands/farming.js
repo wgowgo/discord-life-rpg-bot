@@ -42,7 +42,11 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('농장')
-                .setDescription('내 농장 상태를 확인합니다 (회원가입 필요)')),
+                .setDescription('내 농장 상태를 확인합니다 (회원가입 필요)'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('상점')
+                .setDescription('씨앗 상점을 확인합니다 (누구나 사용 가능)')),
 
     async execute(interaction, db) {
         const farmingSystem = new FarmingSystem(db);
@@ -62,6 +66,9 @@ module.exports = {
                     break;
                 case '농장':
                     await this.handleFarm(interaction, farmingSystem, userId);
+                    break;
+                case '상점':
+                    await this.handleShop(interaction, farmingSystem);
                     break;
             }
         } catch (error) {
@@ -101,6 +108,23 @@ module.exports = {
     async handleFarm(interaction, farmingSystem, userId) {
         const farmData = await farmingSystem.getFarmStatus(userId);
         const embed = farmingSystem.createFarmStatusEmbed(farmData);
+        
+        await interaction.reply({ embeds: [embed] });
+    },
+
+    async handleShop(interaction, farmingSystem) {
+        const shopCrops = farmingSystem.getShopCrops();
+        
+        const embed = new EmbedBuilder()
+            .setColor('#00ff00')
+            .setTitle('🌱 씨앗 상점')
+            .setTimestamp();
+
+        const cropText = shopCrops.map(crop => {
+            return `**${crop.name}** - ${crop.seeds_cost}원\n📊 성장시간: ${crop.growth_time}분 | 가치: ${crop.value}원\n📝 ${crop.description}`;
+        }).join('\n\n');
+        
+        embed.setDescription(cropText);
         
         await interaction.reply({ embeds: [embed] });
     }
