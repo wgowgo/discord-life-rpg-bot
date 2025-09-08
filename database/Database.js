@@ -86,12 +86,12 @@ class Database {
     }
 
     async createTables() {
-        const schemaPath = path.join(__dirname, 'schema.sql');
-        const schema = fs.readFileSync(schemaPath, 'utf8');
-        
         // PostgreSQL인지 SQLite인지 확인
         if (this.client && typeof this.client.query === 'function') {
-            // PostgreSQL
+            // PostgreSQL - PostgreSQL용 스키마 사용
+        const schemaPath = path.join(__dirname, 'schema.sql');
+        const schema = fs.readFileSync(schemaPath, 'utf8');
+            
             try {
                 await this.client.query(schema);
                 console.log('PostgreSQL 테이블이 생성되었습니다.');
@@ -101,7 +101,13 @@ class Database {
                 throw error;
             }
         } else {
-            // SQLite
+            // SQLite - SQLite용 스키마 사용 (AUTOINCREMENT)
+            const schemaPath = path.join(__dirname, 'schema.sql');
+            let schema = fs.readFileSync(schemaPath, 'utf8');
+            
+            // PostgreSQL 문법을 SQLite 문법으로 변환
+            schema = schema.replace(/SERIAL PRIMARY KEY/g, 'INTEGER PRIMARY KEY AUTOINCREMENT');
+        
         return new Promise((resolve, reject) => {
                 this.client.exec(schema, (err) => {
                 if (err) {

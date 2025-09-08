@@ -1,3 +1,4 @@
+
 -- 플레이어 기본 정보
 CREATE TABLE IF NOT EXISTS players (
     id TEXT PRIMARY KEY,
@@ -47,7 +48,7 @@ CREATE TABLE IF NOT EXISTS player_rpg_stats (
 
 -- 직업 정보
 CREATE TABLE IF NOT EXISTS jobs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     category TEXT NOT NULL,
     level_required INTEGER DEFAULT 1,
@@ -61,7 +62,7 @@ CREATE TABLE IF NOT EXISTS jobs (
 
 -- 플레이어 직업
 CREATE TABLE IF NOT EXISTS player_jobs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     player_id TEXT NOT NULL,
     job_id INTEGER NOT NULL,
     start_date DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -95,7 +96,7 @@ CREATE TABLE IF NOT EXISTS stocks (
 
 -- 플레이어 주식 포트폴리오
 CREATE TABLE IF NOT EXISTS player_stocks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     player_id TEXT NOT NULL,
     stock_symbol TEXT NOT NULL,
     quantity INTEGER NOT NULL,
@@ -107,7 +108,7 @@ CREATE TABLE IF NOT EXISTS player_stocks (
 
 -- 거래 내역
 CREATE TABLE IF NOT EXISTS transactions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     player_id TEXT,
     type TEXT NOT NULL, -- 'buy', 'sell', 'salary', 'reward', etc.
     amount REAL NOT NULL,
@@ -121,7 +122,7 @@ CREATE TABLE IF NOT EXISTS transactions (
 
 -- 부동산
 CREATE TABLE IF NOT EXISTS properties (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     type TEXT NOT NULL, -- 'residential', 'commercial', 'luxury'
     price REAL NOT NULL,
@@ -136,7 +137,7 @@ CREATE TABLE IF NOT EXISTS properties (
 
 -- 플레이어 부동산
 CREATE TABLE IF NOT EXISTS player_properties (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     player_id TEXT NOT NULL,
     property_id INTEGER NOT NULL,
     purchase_price REAL NOT NULL,
@@ -147,7 +148,7 @@ CREATE TABLE IF NOT EXISTS player_properties (
 
 -- 사업 종류
 CREATE TABLE IF NOT EXISTS business_types (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     category TEXT NOT NULL,
     initial_cost REAL NOT NULL,
@@ -159,7 +160,7 @@ CREATE TABLE IF NOT EXISTS business_types (
 
 -- 플레이어 사업
 CREATE TABLE IF NOT EXISTS player_businesses (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     player_id TEXT NOT NULL,
     business_type_id INTEGER NOT NULL,
     name TEXT NOT NULL,
@@ -175,7 +176,7 @@ CREATE TABLE IF NOT EXISTS player_businesses (
 
 -- 교육 과정
 CREATE TABLE IF NOT EXISTS courses (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     category TEXT NOT NULL,
     duration_weeks INTEGER NOT NULL,
@@ -187,7 +188,7 @@ CREATE TABLE IF NOT EXISTS courses (
 
 -- 플레이어 교육
 CREATE TABLE IF NOT EXISTS player_education (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     player_id TEXT NOT NULL,
     course_id INTEGER NOT NULL,
     start_date DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -200,7 +201,7 @@ CREATE TABLE IF NOT EXISTS player_education (
 
 -- 던전 정보
 CREATE TABLE IF NOT EXISTS dungeons (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     level_required INTEGER NOT NULL,
     difficulty TEXT NOT NULL, -- 'easy', 'normal', 'hard', 'extreme'
@@ -212,7 +213,7 @@ CREATE TABLE IF NOT EXISTS dungeons (
 
 -- 플레이어 던전 기록
 CREATE TABLE IF NOT EXISTS player_dungeons (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     player_id TEXT NOT NULL,
     dungeon_id INTEGER NOT NULL,
     completion_date DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -224,7 +225,7 @@ CREATE TABLE IF NOT EXISTS player_dungeons (
 
 -- 로맨스 관계
 CREATE TABLE IF NOT EXISTS relationships (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     player1_id TEXT NOT NULL,
     player2_id TEXT NOT NULL,
     relationship_type TEXT NOT NULL, -- 'friendship', 'romance', 'marriage'
@@ -237,7 +238,7 @@ CREATE TABLE IF NOT EXISTS relationships (
 
 -- 친구 관계
 CREATE TABLE IF NOT EXISTS friendships (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     player1_id TEXT NOT NULL,
     player2_id TEXT NOT NULL,
     status TEXT NOT NULL, -- 'pending', 'accepted', 'blocked'
@@ -248,7 +249,7 @@ CREATE TABLE IF NOT EXISTS friendships (
 
 -- 결혼 관계
 CREATE TABLE IF NOT EXISTS marriages (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     player1_id TEXT NOT NULL,
     player2_id TEXT NOT NULL,
     wedding_date DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -273,7 +274,7 @@ CREATE TABLE IF NOT EXISTS achievements (
 
 -- 플레이어 업적
 CREATE TABLE IF NOT EXISTS player_achievements (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     player_id TEXT NOT NULL,
     achievement_id TEXT NOT NULL,
     unlocked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -284,7 +285,7 @@ CREATE TABLE IF NOT EXISTS player_achievements (
 
 -- 아이템
 CREATE TABLE IF NOT EXISTS items (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     category TEXT NOT NULL,
     price INTEGER NOT NULL,
@@ -299,7 +300,7 @@ CREATE TABLE IF NOT EXISTS items (
 
 -- 상점 아이템
 CREATE TABLE IF NOT EXISTS shop_items (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     category TEXT NOT NULL,
     price INTEGER NOT NULL,
@@ -314,7 +315,7 @@ CREATE TABLE IF NOT EXISTS shop_items (
 
 -- 플레이어 인벤토리
 CREATE TABLE IF NOT EXISTS player_inventory (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     player_id TEXT NOT NULL,
     item_id INTEGER NOT NULL,
     quantity INTEGER DEFAULT 1,
@@ -326,7 +327,7 @@ CREATE TABLE IF NOT EXISTS player_inventory (
 
 -- 플레이어 도구
 CREATE TABLE IF NOT EXISTS player_tools (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     player_id TEXT NOT NULL,
     tool_type TEXT NOT NULL, -- 'fishing_rod', 'pickaxe', 'hoe'
     tool_id TEXT NOT NULL,
@@ -337,7 +338,7 @@ CREATE TABLE IF NOT EXISTS player_tools (
 
 -- 펫 종류
 CREATE TABLE IF NOT EXISTS pet_types (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT NOT NULL,
     rarity TEXT NOT NULL,
@@ -347,7 +348,7 @@ CREATE TABLE IF NOT EXISTS pet_types (
 
 -- 개인 채널
 CREATE TABLE IF NOT EXISTS private_channels (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     player_id TEXT NOT NULL,
     channel_id TEXT NOT NULL,
     guild_id TEXT NOT NULL,
