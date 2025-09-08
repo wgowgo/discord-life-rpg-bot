@@ -1,7 +1,7 @@
 class StockMarket {
     constructor(database) {
         this.db = database;
-        this.volatility = 0.05; // 5% 기본 변동성
+        this.volatility = 0.08; // 8% 기본 변동성 (더 활발한 변동)
     }
 
     async updatePrices() {
@@ -18,9 +18,14 @@ class StockMarket {
                     WHERE symbol = ?
                 `, [newPrice, changePercent, stock.symbol]);
 
-                // 주요 변동 시 뉴스 생성
-                if (Math.abs(changePercent) > 10) {
+                // 주요 변동 시 뉴스 생성 (임계값 낮춤)
+                if (Math.abs(changePercent) > 5) {
                     await this.generateNews(stock, changePercent);
+                }
+                
+                // 큰 변동 시 콘솔 로그
+                if (Math.abs(changePercent) > 8) {
+                    console.log(`📈 ${stock.symbol}: ${stock.current_price.toFixed(2)} → ${newPrice.toFixed(2)} (${changePercent > 0 ? '+' : ''}${changePercent.toFixed(2)}%)`);
                 }
             }
 
@@ -31,17 +36,23 @@ class StockMarket {
     }
 
     calculateNewPrice(currentPrice, sector) {
-        // 섹터별 변동성 조정
+        // 섹터별 변동성 조정 (더 활발한 변동)
         let sectorVolatility = this.volatility;
         switch (sector) {
             case 'technology':
-                sectorVolatility = 0.08; // 기술주는 높은 변동성
+                sectorVolatility = 0.12; // 기술주는 높은 변동성
                 break;
             case 'finance':
-                sectorVolatility = 0.04; // 금융주는 낮은 변동성
+                sectorVolatility = 0.06; // 금융주는 낮은 변동성
                 break;
             case 'entertainment':
-                sectorVolatility = 0.12; // 엔터테인먼트는 매우 높은 변동성
+                sectorVolatility = 0.18; // 엔터테인먼트는 매우 높은 변동성
+                break;
+            case 'healthcare':
+                sectorVolatility = 0.10; // 헬스케어는 중간 변동성
+                break;
+            case 'energy':
+                sectorVolatility = 0.15; // 에너지는 높은 변동성
                 break;
         }
 

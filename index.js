@@ -362,12 +362,15 @@ class LifeRPGBot {
             await this.performDailyReset();
         });
 
-        // 매 시간마다 실행 - 주식 가격 업데이트
-        cron.schedule('0 * * * *', async () => {
+        // 매 5분마다 실행 - 주식 가격 업데이트 (실시간 변동)
+        cron.schedule('*/5 * * * *', async () => {
             console.log('주식 가격 업데이트...');
             await this.stockMarket.updatePrices();
-            
-            // 부동산 가격도 함께 업데이트
+        });
+
+        // 매 15분마다 실행 - 부동산 가격 업데이트
+        cron.schedule('*/15 * * * *', async () => {
+            console.log('부동산 가격 업데이트...');
             await this.propertySystem.updatePropertyPrices();
         });
 
