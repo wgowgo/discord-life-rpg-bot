@@ -32,6 +32,10 @@ class Player {
                 SELECT * FROM player_stats WHERE player_id = ?
             `, [userId]);
 
+            const rpgStats = await this.db.get(`
+                SELECT * FROM player_rpg_stats WHERE player_id = ?
+            `, [userId]);
+
             const currentJob = await this.db.get(`
                 SELECT pj.*, j.name as job_name, j.category 
                 FROM player_jobs pj
@@ -60,6 +64,7 @@ class Player {
             return {
                 player: player,
                 stats: stats,
+                rpgStats: rpgStats,
                 currentJob: currentJob,
                 achievementCount: achievements[0]?.count || 0,
                 activePet: activePet,
@@ -81,7 +86,7 @@ class Player {
                 .setDescription('플레이어 정보를 찾을 수 없습니다.');
         }
 
-        const { player, stats, currentJob, achievementCount, activePet, activeTitle } = profileData;
+        const { player, stats, rpgStats, currentJob, achievementCount, activePet, activeTitle } = profileData;
 
         const embed = new EmbedBuilder()
             .setColor('#0099ff')
@@ -107,9 +112,9 @@ class Player {
             });
         }
 
-        // 스탯 정보
+        // 인생게임 스탯 정보
         if (stats) {
-            const statText = [
+            const lifeStatText = [
                 `❤️ 체력: ${stats.health}`,
                 `😊 행복: ${stats.happiness}`,
                 `🧠 지능: ${stats.intelligence}`,
@@ -121,8 +126,28 @@ class Player {
             ].join('\n');
 
             embed.addFields({
-                name: '📈 능력치',
-                value: statText,
+                name: '🏠 인생게임 스탯',
+                value: lifeStatText,
+                inline: true
+            });
+        }
+
+        // RPG 스탯 정보
+        if (rpgStats) {
+            const rpgStatText = [
+                `❤️ HP: ${rpgStats.hp}/${rpgStats.max_hp}`,
+                `💙 MP: ${rpgStats.mp}/${rpgStats.max_mp}`,
+                `⚔️ 공격력: ${rpgStats.attack}`,
+                `🛡️ 방어력: ${rpgStats.defense}`,
+                `🔮 마법공격: ${rpgStats.magic_attack}`,
+                `🔰 마법방어: ${rpgStats.magic_defense}`,
+                `🏃 속도: ${rpgStats.speed}`,
+                `💥 크리티컬: ${(rpgStats.critical_rate * 100).toFixed(1)}%`
+            ].join('\n');
+
+            embed.addFields({
+                name: '⚔️ RPG 스탯',
+                value: rpgStatText,
                 inline: true
             });
         }
@@ -148,6 +173,13 @@ class Player {
     }
 
     async createPlayer(userId, username) {
+        // 기존 플레이어가 있는지 확인
+        const existingPlayer = await this.db.get('SELECT * FROM players WHERE id = ?', [userId]);
+        if (existingPlayer) {
+            console.log(`플레이어 ${username} (${userId})는 이미 존재합니다.`);
+            return false; // 이미 존재함
+        }
+
         const startingMoney = 50000; // 기본 시작 자금
         const startingStats = {
             health: 100,

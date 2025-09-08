@@ -1,4 +1,4 @@
- 요-- 플레이어 기본 정보
+ 요그리고 ㅏ-- 플레이어 기본 정보
 CREATE TABLE IF NOT EXISTS players (
     id TEXT PRIMARY KEY,
     username TEXT NOT NULL,

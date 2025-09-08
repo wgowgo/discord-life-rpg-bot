@@ -11,7 +11,7 @@ module.exports = {
                 .setDescription('게임에 참여하기 위해 회원가입합니다'))
         .addSubcommand(subcommand =>
             subcommand
-                .setName('보기')
+                .setName('확인')
                 .setDescription('내 프로필을 확인합니다')
                 .addUserOption(option =>
                     option.setName('유저')
@@ -32,7 +32,7 @@ module.exports = {
                 case '회원가입':
                     await this.handleRegisterProfile(interaction, db, personalChannelSystem);
                     break;
-                case '보기':
+                case '확인':
                     await this.handleViewProfile(interaction, db, personalChannelSystem);
                     break;
                 case '초기화':
