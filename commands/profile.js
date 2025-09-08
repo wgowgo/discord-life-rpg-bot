@@ -53,10 +53,29 @@ module.exports = {
         const player = new Player(db);
 
         try {
-            // 프로필 데이터 가져오기 (없으면 생성)
+            // 먼저 기존 플레이어가 있는지 확인 (생성하지 않음)
+            const existingPlayer = await player.getProfile(
+                targetUser.id, 
+                targetUser.displayName || targetUser.username,
+                false // 새 플레이어 생성하지 않음
+            );
+            
+            // 이미 등록된 플레이어인 경우
+            if (existingPlayer) {
+                const embed = await player.createProfileEmbed(existingPlayer);
+                embed.setTitle('👤 프로필 정보');
+                embed.setDescription('이미 회원가입된 계정입니다.');
+                embed.setColor(0x5865F2); // Discord 블루
+                
+                await interaction.reply({ embeds: [embed] });
+                return;
+            }
+
+            // 새 플레이어인 경우 - 프로필 생성
             const profileData = await player.getProfile(
                 targetUser.id, 
-                targetUser.displayName || targetUser.username
+                targetUser.displayName || targetUser.username,
+                true // 새 플레이어 생성
             );
             
             if (!profileData) {

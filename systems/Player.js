@@ -5,7 +5,7 @@ class Player {
         this.db = database;
     }
 
-    async getProfile(userId, username = null) {
+    async getProfile(userId, username = null, createIfNotExists = true) {
         try {
             let player = await this.db.get(`
                 SELECT * FROM players WHERE id = ?
@@ -13,8 +13,8 @@ class Player {
 
             let isNewPlayer = false;
             
-            // 플레이어가 없으면 새로 생성
-            if (!player && username) {
+            // 플레이어가 없으면 새로 생성 (createIfNotExists가 true일 때만)
+            if (!player && username && createIfNotExists) {
                 await this.createPlayer(userId, username);
                 player = await this.db.get(`
                     SELECT * FROM players WHERE id = ?

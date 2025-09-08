@@ -303,3 +303,14 @@ CREATE TABLE IF NOT EXISTS rankings (
     FOREIGN KEY (player_id) REFERENCES players(id)
 );
 
+-- 도박 기록
+CREATE TABLE IF NOT EXISTS gambling_records (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    player_id TEXT,
+    game_type TEXT NOT NULL, -- 'coin_flip', 'dice_roll', 'slot_machine', 'card_game'
+    bet_amount REAL NOT NULL,
+    net_result REAL NOT NULL, -- 순수익 (양수: 승리, 음수: 패배)
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (player_id) REFERENCES players(id)
+);
+
