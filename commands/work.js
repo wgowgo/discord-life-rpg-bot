@@ -183,19 +183,20 @@ module.exports = {
             const quitTime = new Date(cooldown.quit_time);
             const now = new Date();
             const timeDiff = now - quitTime;
-            const oneHour = 60 * 60 * 1000; // 1시간을 밀리초로
+            const eightDays = 8 * 24 * 60 * 60 * 1000; // 8일을 밀리초로
 
-            if (timeDiff < oneHour) {
-                const remainingTime = oneHour - timeDiff;
-                const remainingMinutes = Math.ceil(remainingTime / (60 * 1000));
+            if (timeDiff < eightDays) {
+                const remainingTime = eightDays - timeDiff;
+                const remainingDays = Math.ceil(remainingTime / (24 * 60 * 60 * 1000));
+                const remainingHours = Math.ceil((remainingTime % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
                 
                 const embed = new EmbedBuilder()
                     .setColor('#ff9900')
                     .setTitle('⏰ 재취업 쿨다운')
-                    .setDescription('퇴사 후 1시간 동안은 새로운 직업에 지원할 수 없습니다.')
+                    .setDescription('퇴사 후 8일 동안은 새로운 직업에 지원할 수 없습니다.')
                     .addFields({
                         name: '⏳ 남은 시간',
-                        value: `${remainingMinutes}분`,
+                        value: `${remainingDays}일 ${remainingHours}시간`,
                         inline: true
                     })
                     .setFooter({ text: '조금만 기다려주세요!' });
@@ -385,7 +386,7 @@ module.exports = {
                 },
                 {
                     name: '⏰ 재취업 쿨다운',
-                    value: '1시간 후 새로운 직업에 지원할 수 있습니다.',
+                    value: '8일 후 새로운 직업에 지원할 수 있습니다.',
                     inline: true
                 }
             );
