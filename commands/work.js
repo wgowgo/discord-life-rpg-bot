@@ -24,7 +24,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('급여')
-                .setDescription('이번 달 급여를 받습니다')),
+                .setDescription('이번 주 급여를 받습니다 (일주일에 한번)')),
 
     async execute(interaction, db) {
         const subcommand = interaction.options.getSubcommand();
@@ -415,14 +415,14 @@ module.exports = {
         `, [userId]);
 
         const now = new Date();
-        const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+        const oneWeekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000)); // 7일 전
 
-        if (lastSalary && new Date(lastSalary.timestamp) > oneMonthAgo) {
+        if (lastSalary && new Date(lastSalary.timestamp) > oneWeekAgo) {
             const nextSalaryDate = new Date(lastSalary.timestamp);
-            nextSalaryDate.setMonth(nextSalaryDate.getMonth() + 1);
+            nextSalaryDate.setDate(nextSalaryDate.getDate() + 7); // 7일 후
             
             await interaction.reply({ 
-                content: `이미 이번 달 급여를 받았습니다. 다음 급여일: ${nextSalaryDate.toLocaleDateString('ko-KR')}`, 
+                content: `이미 이번 주 급여를 받았습니다. 다음 급여일: ${nextSalaryDate.toLocaleDateString('ko-KR')}`, 
                 ephemeral: true 
             });
             return;
@@ -449,8 +449,8 @@ module.exports = {
 
         const embed = new EmbedBuilder()
             .setColor('#00ff00')
-            .setTitle('💰 급여 지급')
-            .setDescription(`${currentJob.job_name}에서 급여를 받았습니다!`)
+            .setTitle('💰 주급 지급')
+            .setDescription(`${currentJob.job_name}에서 주급을 받았습니다!`)
             .addFields({
                 name: '💵 지급 금액',
                 value: `${salary.toLocaleString()}원`,
