@@ -1,26 +1,46 @@
-const sqlite3 = require('sqlite3').verbose();
+const { Client } = require('pg');
 const path = require('path');
 const fs = require('fs');
 
 class Database {
-    constructor(filename = 'game.db') {
-        this.dbPath = path.join(__dirname, filename);
-        this.db = null;
+    constructor() {
+        this.client = null;
         this.init();
     }
 
     async init() {
-        return new Promise((resolve, reject) => {
-            this.db = new sqlite3.Database(this.dbPath, (err) => {
-                if (err) {
-                    console.error('데이터베이스 연결 오류:', err);
-                    reject(err);
-                } else {
-                    console.log('SQLite 데이터베이스에 연결되었습니다.');
-                    this.createTables().then(resolve).catch(reject);
-                }
-            });
-        });
+        try {
+            // Railway에서 DATABASE_URL 환경변수 사용, 없으면 로컬 SQLite 사용
+            if (process.env.DATABASE_URL) {
+                this.client = new Client({
+                    connectionString: process.env.DATABASE_URL,
+                    ssl: {
+                        rejectUnauthorized: false
+                    }
+                });
+                await this.client.connect();
+                console.log('PostgreSQL 데이터베이스에 연결되었습니다.');
+                await this.createTables();
+            } else {
+                // 로컬 개발용 SQLite 연결
+                const sqlite3 = require('sqlite3').verbose();
+                const filename = 'game.db';
+                const dbPath = path.join(__dirname, filename);
+                
+                this.client = new sqlite3.Database(dbPath, (err) => {
+                    if (err) {
+                        console.error('데이터베이스 연결 오류:', err);
+                        throw err;
+                    } else {
+                        console.log('SQLite 데이터베이스에 연결되었습니다.');
+                    }
+                });
+                await this.createTables();
+            }
+        } catch (error) {
+            console.error('데이터베이스 초기화 오류:', error);
+            throw error;
+        }
     }
 
     async createTables() {
