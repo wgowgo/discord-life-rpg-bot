@@ -166,3 +166,4 @@ echo "   pm2 logs discord-life-rpg-bot"
 echo "   sudo systemctl status discord-life-rpg"
 
 
+

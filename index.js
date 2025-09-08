@@ -59,6 +59,12 @@ class LifeRPGBot {
             await this.loadCommands();
             await this.setupEventHandlers();
             await this.setupCronJobs();
+            
+            // Railway에서 자동으로 명령어 등록
+            if (process.env.NODE_ENV === 'production') {
+                await this.deployCommands();
+            }
+            
             await this.client.login(config.token);
         } catch (error) {
             console.error('봇 초기화 오류:', error);
@@ -96,6 +102,28 @@ class LifeRPGBot {
             } catch (error) {
                 console.error(`명령어 로드 오류 (${file}):`, error);
             }
+        }
+    }
+
+    async deployCommands() {
+        try {
+            const { REST } = require('@discordjs/rest');
+            const { Routes } = require('discord-api-types/v10');
+            
+            const rest = new REST({ version: '10' }).setToken(config.token);
+            
+            const commands = Array.from(this.commands.values()).map(command => command.data.toJSON());
+            
+            console.log(`${commands.length}개의 슬래시 명령어를 등록하는 중...`);
+            
+            await rest.put(
+                Routes.applicationGuildCommands(config.clientId, config.guildId),
+                { body: commands }
+            );
+            
+            console.log('슬래시 명령어 등록이 완료되었습니다!');
+        } catch (error) {
+            console.error('명령어 등록 중 오류 발생:', error);
         }
     }
 
