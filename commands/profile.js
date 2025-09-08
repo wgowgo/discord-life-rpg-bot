@@ -54,7 +54,7 @@ module.exports = {
 
         try {
             // 먼저 기존 플레이어가 있는지 직접 확인
-            const existingPlayer = await db.get(`
+            const existingPlayer = await client.db.get(`
                 SELECT * FROM players WHERE id = ?
             `, [targetUser.id]);
             
@@ -293,7 +293,7 @@ module.exports = {
 
                 messageCollector.on('collect', async (message) => {
                     try {
-                        await this.performDataReset(db, userId, interaction);
+                        await this.performDataReset(client, userId, interaction);
                         
                         const successEmbed = new EmbedBuilder()
                             .setColor(0x4CAF50)
@@ -382,7 +382,7 @@ module.exports = {
     },
 
 
-    async performDataReset(db, userId, interaction) {
+    async performDataReset(client, userId, interaction) {
         // 기존 개인 채널 삭제
         try {
             const PersonalChannelSystem = require('../systems/PersonalChannelSystem');
@@ -418,7 +418,7 @@ module.exports = {
 
         for (const { table, column } of tablesToReset) {
             try {
-                await db.run(`DELETE FROM ${table} WHERE ${column} = ?`, [userId]);
+                await client.db.run(`DELETE FROM ${table} WHERE ${column} = ?`, [userId]);
             } catch (error) {
                 console.error(`${table} 테이블 초기화 오류:`, error);
             }
@@ -426,23 +426,23 @@ module.exports = {
 
         // friendships와 marriages 테이블은 두 컬럼 모두 확인
         try {
-            await db.run(`DELETE FROM friendships WHERE player1_id = ? OR player2_id = ?`, [userId, userId]);
+            await client.db.run(`DELETE FROM friendships WHERE player1_id = ? OR player2_id = ?`, [userId, userId]);
         } catch (error) {
             console.error('friendships 테이블 초기화 오류:', error);
         }
 
         try {
-            await db.run(`DELETE FROM marriages WHERE player1_id = ? OR player2_id = ?`, [userId, userId]);
+            await client.db.run(`DELETE FROM marriages WHERE player1_id = ? OR player2_id = ?`, [userId, userId]);
         } catch (error) {
             console.error('marriages 테이블 초기화 오류:', error);
         }
 
         // 기존 플레이어가 완전히 삭제되었는지 확인
         try {
-            const existingPlayer = await db.get('SELECT * FROM players WHERE id = ?', [userId]);
+            const existingPlayer = await client.db.get('SELECT * FROM players WHERE id = ?', [userId]);
             if (existingPlayer) {
                 // 기존 플레이어가 남아있다면 강제 삭제
-                await db.run('DELETE FROM players WHERE id = ?', [userId]);
+                await client.db.run('DELETE FROM players WHERE id = ?', [userId]);
                 console.log(`기존 플레이어 ${userId} 강제 삭제 완료`);
             }
             
