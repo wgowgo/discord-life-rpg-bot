@@ -1,0 +1,32 @@
+{
+  "token": "YOUR_BOT_TOKEN_HERE",
+  "clientId": "YOUR_CLIENT_ID_HERE",
+  "guildId": "YOUR_GUILD_ID_HERE",
+  "database": {
+    "filename": "game.db"
+  },
+  "game": {
+    "startingMoney": 10000,
+    "startingStats": {
+      "health": 100,
+      "happiness": 50,
+      "education": 0,
+      "charm": 50,
+      "luck": 50,
+      "intelligence": 50,
+      "strength": 50,
+      "agility": 50
+    },
+    "chatRewards": {
+      "minMoney": 10,
+      "maxMoney": 100,
+      "experiencePerMessage": 1,
+      "cooldown": 60000
+    },
+    "voiceRewards": {
+      "moneyPerMinute": 5,
+      "experiencePerMinute": 2
+    }
+  }
+}
+ 

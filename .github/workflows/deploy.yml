@@ -1,0 +1,29 @@
+name: Deploy Discord Bot
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Deploy to Railway
+      run: |
+        echo "Deploying to Railway..."
+        # Railway CLI 설치 및 배포
+        npm install -g @railway/cli
+        railway login --token ${{ secrets.RAILWAY_TOKEN }}
+        railway up

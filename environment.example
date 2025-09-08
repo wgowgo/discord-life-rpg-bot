@@ -1,0 +1,20 @@
+# Discord Bot Configuration
+BOT_TOKEN=your_bot_token_here
+CLIENT_ID=your_client_id_here
+GUILD_ID=your_server_id_optional
+
+# Database Configuration
+DATABASE_FILE=lifeRPG.db
+
+# Game Settings
+STARTING_MONEY=50000
+CHAT_REWARD_MONEY=100
+CHAT_REWARD_EXP=10
+VOICE_REWARD_MONEY_PER_MINUTE=50
+VOICE_REWARD_EXP_PER_MINUTE=5
+
+# Server Settings (for health check)
+PORT=3000
+NODE_ENV=production
+
+
