@@ -71,17 +71,31 @@ class Database {
         const schemaPath = path.join(__dirname, 'schema.sql');
         const schema = fs.readFileSync(schemaPath, 'utf8');
         
-        return new Promise((resolve, reject) => {
-            this.db.exec(schema, (err) => {
-                if (err) {
-                    console.error('테이블 생성 오류:', err);
-                    reject(err);
-                } else {
-                    console.log('데이터베이스 테이블이 생성되었습니다.');
-                    this.seedInitialData().then(resolve).catch(reject);
-                }
+        // PostgreSQL인지 SQLite인지 확인
+        if (this.client && typeof this.client.query === 'function') {
+            // PostgreSQL
+            try {
+                await this.client.query(schema);
+                console.log('PostgreSQL 테이블이 생성되었습니다.');
+                await this.seedInitialData();
+            } catch (error) {
+                console.error('PostgreSQL 테이블 생성 오류:', error);
+                throw error;
+            }
+        } else {
+            // SQLite
+            return new Promise((resolve, reject) => {
+                this.client.exec(schema, (err) => {
+                    if (err) {
+                        console.error('SQLite 테이블 생성 오류:', err);
+                        reject(err);
+                    } else {
+                        console.log('SQLite 테이블이 생성되었습니다.');
+                        this.seedInitialData().then(resolve).catch(reject);
+                    }
+                });
             });
-        });
+        }
     }
 
     async seedInitialData() {
@@ -706,58 +720,122 @@ class Database {
         if (data.length === 0) return;
         
         const columns = Object.keys(data[0]);
-        const placeholders = columns.map(() => '?').join(', ');
-        const sql = `INSERT OR IGNORE INTO ${table} (${columns.join(', ')}) VALUES (${placeholders})`;
         
-        return new Promise((resolve, reject) => {
-            const stmt = this.db.prepare(sql);
-            data.forEach(row => {
+        // PostgreSQL인지 SQLite인지 확인
+        if (this.client && typeof this.client.query === 'function') {
+            // PostgreSQL
+            const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
+            const sql = `INSERT INTO ${table} (${columns.join(', ')}) VALUES (${placeholders}) ON CONFLICT DO NOTHING`;
+            
+            for (const row of data) {
                 const values = columns.map(col => row[col]);
-                stmt.run(values);
+                try {
+                    await this.client.query(sql, values);
+                } catch (error) {
+                    console.error(`${table} 삽입 오류:`, error);
+                }
+            }
+        } else {
+            // SQLite
+            const placeholders = columns.map(() => '?').join(', ');
+            const sql = `INSERT OR IGNORE INTO ${table} (${columns.join(', ')}) VALUES (${placeholders})`;
+            
+            return new Promise((resolve, reject) => {
+                const stmt = this.client.prepare(sql);
+                data.forEach(row => {
+                    const values = columns.map(col => row[col]);
+                    stmt.run(values);
+                });
+                stmt.finalize((err) => {
+                    if (err) reject(err);
+                    else resolve();
+                });
             });
-            stmt.finalize((err) => {
-                if (err) reject(err);
-                else resolve();
-            });
-        });
+        }
     }
 
     async get(sql, params = []) {
-        return new Promise((resolve, reject) => {
-            this.db.get(sql, params, (err, row) => {
-                if (err) reject(err);
-                else resolve(row);
+        // PostgreSQL인지 SQLite인지 확인
+        if (this.client && typeof this.client.query === 'function') {
+            // PostgreSQL
+            try {
+                const result = await this.client.query(sql, params);
+                return result.rows[0] || null;
+            } catch (error) {
+                throw error;
+            }
+        } else {
+            // SQLite
+            return new Promise((resolve, reject) => {
+                this.client.get(sql, params, (err, row) => {
+                    if (err) reject(err);
+                    else resolve(row);
+                });
             });
-        });
+        }
     }
 
     async all(sql, params = []) {
-        return new Promise((resolve, reject) => {
-            this.db.all(sql, params, (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows);
+        // PostgreSQL인지 SQLite인지 확인
+        if (this.client && typeof this.client.query === 'function') {
+            // PostgreSQL
+            try {
+                const result = await this.client.query(sql, params);
+                return result.rows;
+            } catch (error) {
+                throw error;
+            }
+        } else {
+            // SQLite
+            return new Promise((resolve, reject) => {
+                this.client.all(sql, params, (err, rows) => {
+                    if (err) reject(err);
+                    else resolve(rows);
+                });
             });
-        });
+        }
     }
 
     async run(sql, params = []) {
-        return new Promise((resolve, reject) => {
-            this.db.run(sql, params, function(err) {
-                if (err) reject(err);
-                else resolve({ id: this.lastID, changes: this.changes });
+        // PostgreSQL인지 SQLite인지 확인
+        if (this.client && typeof this.client.query === 'function') {
+            // PostgreSQL
+            try {
+                const result = await this.client.query(sql, params);
+                return { id: null, changes: result.rowCount };
+            } catch (error) {
+                throw error;
+            }
+        } else {
+            // SQLite
+            return new Promise((resolve, reject) => {
+                this.client.run(sql, params, function(err) {
+                    if (err) reject(err);
+                    else resolve({ id: this.lastID, changes: this.changes });
+                });
             });
-        });
+        }
     }
 
     close() {
-        if (this.db) {
-            this.db.close((err) => {
-                if (err) {
-                    console.error('데이터베이스 연결 종료 오류:', err);
-                } else {
-                    console.log('데이터베이스 연결이 종료되었습니다.');
-                }
-            });
+        if (this.client) {
+            if (typeof this.client.end === 'function') {
+                // PostgreSQL
+                this.client.end().then(() => {
+                    console.log('PostgreSQL 연결이 종료되었습니다.');
+                }).catch((err) => {
+                    console.error('PostgreSQL 연결 종료 오류:', err);
+                });
+            } else {
+                // SQLite
+                this.client.close((err) => {
+                    if (err) {
+                        console.error('SQLite 연결 종료 오류:', err);
+                    } else {
+                        console.log('SQLite 연결이 종료되었습니다.');
+                    }
+                });
+            }
         }
     }
 }
