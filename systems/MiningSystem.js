@@ -132,6 +132,44 @@ class MiningSystem {
         ];
     }
 
+    async initializeMiningSystem() {
+        // 채굴 테이블들 생성
+        await this.db.run(`
+            CREATE TABLE IF NOT EXISTS player_mining (
+                player_id TEXT PRIMARY KEY,
+                mining_level INTEGER DEFAULT 1,
+                mining_exp INTEGER DEFAULT 0,
+                total_ore_mined INTEGER DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        await this.db.run(`
+            CREATE TABLE IF NOT EXISTS player_mining_tools (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id TEXT NOT NULL,
+                tool_id TEXT NOT NULL,
+                durability INTEGER NOT NULL,
+                obtained_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(player_id, tool_id)
+            )
+        `);
+
+        await this.db.run(`
+            CREATE TABLE IF NOT EXISTS player_mining_records (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id TEXT NOT NULL,
+                mine_id INTEGER NOT NULL,
+                ore_type TEXT NOT NULL,
+                quantity INTEGER DEFAULT 1,
+                mined_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        console.log('채굴 시스템 초기화 완료');
+    }
+
     // 광산 목록 조회
     async getMineList() {
         return this.mines;

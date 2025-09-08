@@ -5,6 +5,23 @@ class GamblingSystem {
         this.db = database;
     }
 
+    async initializeGamblingSystem() {
+        // 도박 기록 테이블 생성
+        await this.db.run(`
+            CREATE TABLE IF NOT EXISTS gambling_records (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id TEXT NOT NULL,
+                game_type TEXT NOT NULL,
+                bet_amount INTEGER NOT NULL,
+                win_amount INTEGER NOT NULL,
+                result TEXT NOT NULL,
+                played_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        console.log('도박 시스템 초기화 완료');
+    }
+
     // 동전 던지기 (50% 확률)
     async coinFlip(playerId, betAmount, choice) {
         try {
