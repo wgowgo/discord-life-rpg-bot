@@ -17,8 +17,15 @@ class Database {
                 
                 try {
                     // DATABASE_URL 파싱 및 검증
-                    const url = new URL(process.env.DATABASE_URL);
-                    if (!url.protocol || !url.hostname) {
+                    const dbUrl = process.env.DATABASE_URL.trim();
+                    
+                    // 기본 템플릿 URL인지 확인
+                    if (dbUrl.includes('host:port') || dbUrl.includes('password@host')) {
+                        throw new Error('DATABASE_URL이 기본 템플릿 값입니다. 실제 Railway 데이터베이스 URL로 설정해주세요.');
+                    }
+                    
+                    const url = new URL(dbUrl);
+                    if (!url.protocol || !url.hostname || url.hostname === 'host') {
                         throw new Error('Invalid DATABASE_URL format');
                     }
                     
@@ -110,165 +117,7 @@ class Database {
     }
 
     async seedInitialData() {
-        // 기본 직업 데이터 삽입 (대폭 확장)
-        const jobs = [
-            // 서비스업 (10개)
-            { name: '알바생', category: '서비스', base_salary: 100000, required_education: 0, description: '기본적인 서비스 업무' },
-            { name: '카페 직원', category: '서비스', base_salary: 120000, required_education: 0, description: '커피와 디저트 판매' },
-            { name: '편의점 직원', category: '서비스', base_salary: 110000, required_education: 0, description: '24시간 편의점 운영' },
-            { name: '웨이터', category: '서비스', base_salary: 130000, required_education: 0, description: '레스토랑 서빙' },
-            { name: '호텔 직원', category: '서비스', base_salary: 150000, required_education: 1, description: '호텔 고객 서비스' },
-            { name: '미용사', category: '서비스', base_salary: 180000, required_education: 1, description: '헤어 디자인 및 컷' },
-            { name: '마사지사', category: '서비스', base_salary: 160000, required_education: 1, description: '전문 마사지 서비스' },
-            { name: '펜션 관리인', category: '서비스', base_salary: 140000, required_education: 0, description: '펜션 운영 및 관리' },
-            { name: '청소 전문가', category: '서비스', base_salary: 120000, required_education: 0, description: '전문 청소 서비스' },
-            { name: '택배 기사', category: '서비스', base_salary: 170000, required_education: 0, description: '물품 배송 서비스' },
-
-            // IT/기술직 (15개)
-            { name: '개발자', category: 'IT', base_salary: 400000, required_education: 4, description: '소프트웨어 개발' },
-            { name: '프론트엔드 개발자', category: 'IT', base_salary: 380000, required_education: 4, description: '웹 UI/UX 개발' },
-            { name: '백엔드 개발자', category: 'IT', base_salary: 420000, required_education: 4, description: '서버 및 데이터베이스' },
-            { name: '모바일 개발자', category: 'IT', base_salary: 450000, required_education: 4, description: '앱 개발 전문가' },
-            { name: '게임 개발자', category: 'IT', base_salary: 480000, required_education: 5, description: '게임 프로그래밍' },
-            { name: 'AI 개발자', category: 'IT', base_salary: 600000, required_education: 6, description: '인공지능 연구개발' },
-            { name: '데이터 사이언티스트', category: 'IT', base_salary: 550000, required_education: 6, description: '빅데이터 분석' },
-            { name: '시스템 관리자', category: 'IT', base_salary: 350000, required_education: 3, description: '서버 및 네트워크 관리' },
-            { name: '보안 전문가', category: 'IT', base_salary: 500000, required_education: 5, description: '사이버 보안' },
-            { name: 'UI/UX 디자이너', category: 'IT', base_salary: 320000, required_education: 3, description: '사용자 인터페이스 디자인' },
-            { name: '웹 퍼블리셔', category: 'IT', base_salary: 280000, required_education: 2, description: '웹페이지 제작' },
-            { name: 'QA 엔지니어', category: 'IT', base_salary: 300000, required_education: 3, description: '소프트웨어 품질관리' },
-            { name: '클라우드 엔지니어', category: 'IT', base_salary: 520000, required_education: 5, description: '클라우드 인프라 구축' },
-            { name: '블록체인 개발자', category: 'IT', base_salary: 700000, required_education: 6, description: '블록체인 기술 개발' },
-            { name: 'DevOps 엔지니어', category: 'IT', base_salary: 480000, required_education: 5, description: '개발 운영 자동화' },
-
-            // 전문직 (12개)
-            { name: '의사', category: '전문직', base_salary: 800000, required_education: 8, description: '의료 서비스 제공' },
-            { name: '치과의사', category: '전문직', base_salary: 750000, required_education: 8, description: '치과 진료' },
-            { name: '한의사', category: '전문직', base_salary: 600000, required_education: 8, description: '한방 진료' },
-            { name: '수의사', category: '전문직', base_salary: 500000, required_education: 8, description: '동물 진료' },
-            { name: '변호사', category: '전문직', base_salary: 900000, required_education: 8, description: '법률 서비스' },
-            { name: '회계사', category: '전문직', base_salary: 450000, required_education: 6, description: '회계 및 세무' },
-            { name: '건축사', category: '전문직', base_salary: 520000, required_education: 6, description: '건축 설계' },
-            { name: '약사', category: '전문직', base_salary: 400000, required_education: 6, description: '의약품 조제' },
-            { name: '간호사', category: '전문직', base_salary: 300000, required_education: 4, description: '환자 간호' },
-            { name: '물리치료사', category: '전문직', base_salary: 280000, required_education: 4, description: '재활 치료' },
-            { name: '심리상담사', category: '전문직', base_salary: 250000, required_education: 5, description: '심리 상담' },
-            { name: '영양사', category: '전문직', base_salary: 220000, required_education: 4, description: '영양 관리' },
-
-            // 경영/금융 (8개)
-            { name: 'CEO', category: '경영', base_salary: 2000000, required_education: 6, description: '기업 경영' },
-            { name: '임원', category: '경영', base_salary: 1200000, required_education: 6, description: '기업 고위직' },
-            { name: '부장', category: '경영', base_salary: 800000, required_education: 5, description: '부서 관리' },
-            { name: '과장', category: '경영', base_salary: 500000, required_education: 4, description: '팀 리더' },
-            { name: '펀드매니저', category: '금융', base_salary: 800000, required_education: 6, description: '투자 전문가' },
-            { name: '은행원', category: '금융', base_salary: 350000, required_education: 4, description: '금융 서비스' },
-            { name: '보험설계사', category: '금융', base_salary: 280000, required_education: 2, description: '보험 상품 판매' },
-            { name: '증권분석가', category: '금융', base_salary: 600000, required_education: 6, description: '주식 분석' },
-
-            // 교육/연구 (6개)
-            { name: '대학교수', category: '교육', base_salary: 700000, required_education: 10, description: '대학 강의 및 연구' },
-            { name: '고등학교 교사', category: '교육', base_salary: 350000, required_education: 6, description: '고등학교 교육' },
-            { name: '중학교 교사', category: '교육', base_salary: 320000, required_education: 6, description: '중학교 교육' },
-            { name: '초등학교 교사', category: '교육', base_salary: 300000, required_education: 6, description: '초등 교육' },
-            { name: '연구원', category: '연구', base_salary: 500000, required_education: 8, description: '과학 연구' },
-            { name: '학원 강사', category: '교육', base_salary: 200000, required_education: 4, description: '사교육 강의' },
-
-            // 예술/문화 (7개)
-            { name: '화가', category: '예술', base_salary: 150000, required_education: 2, description: '그림 창작' },
-            { name: '음악가', category: '예술', base_salary: 180000, required_education: 3, description: '음악 연주 및 작곡' },
-            { name: '배우', category: '예술', base_salary: 300000, required_education: 1, description: '연기 및 출연' },
-            { name: '가수', category: '예술', base_salary: 400000, required_education: 1, description: '가창 및 공연' },
-            { name: '작가', category: '예술', base_salary: 120000, required_education: 3, description: '소설 및 글 창작' },
-            { name: '사진작가', category: '예술', base_salary: 160000, required_education: 2, description: '사진 촬영' },
-            { name: '영상 감독', category: '예술', base_salary: 350000, required_education: 4, description: '영상 제작 및 연출' },
-
-            // 기타 전문직 (5개)
-            { name: '사무직', category: '일반', base_salary: 250000, required_education: 3, description: '일반적인 사무 업무' },
-            { name: '영업사원', category: '일반', base_salary: 280000, required_education: 2, description: '제품 및 서비스 판매' },
-            { name: '마케터', category: '일반', base_salary: 320000, required_education: 4, description: '마케팅 전략 수립' },
-            { name: '인사담당자', category: '일반', base_salary: 300000, required_education: 4, description: '인사 관리' },
-            { name: '통역사', category: '일반', base_salary: 400000, required_education: 5, description: '언어 통역 서비스' },
-
-            // 신규 스포츠/운동 (8개)
-            { name: '축구선수', category: '스포츠', base_salary: 800000, required_education: 0, description: '프로 축구 선수' },
-            { name: '야구선수', category: '스포츠', base_salary: 750000, required_education: 0, description: '프로 야구 선수' },
-            { name: '농구선수', category: '스포츠', base_salary: 900000, required_education: 0, description: '프로 농구 선수' },
-            { name: '테니스선수', category: '스포츠', base_salary: 600000, required_education: 0, description: '프로 테니스 선수' },
-            { name: '골프선수', category: '스포츠', base_salary: 1200000, required_education: 0, description: '프로 골퍼' },
-            { name: '스포츠 트레이너', category: '스포츠', base_salary: 300000, required_education: 3, description: '운동 지도 및 관리' },
-            { name: '체육 교사', category: '스포츠', base_salary: 320000, required_education: 6, description: '체육 교육' },
-            { name: 'e스포츠선수', category: '스포츠', base_salary: 500000, required_education: 0, description: '프로 게이머' },
-
-            // 미디어/방송 (10개)
-            { name: 'TV 아나운서', category: '미디어', base_salary: 600000, required_education: 6, description: '방송 진행' },
-            { name: '라디오 DJ', category: '미디어', base_salary: 350000, required_education: 4, description: '라디오 프로그램 진행' },
-            { name: '기자', category: '미디어', base_salary: 400000, required_education: 6, description: '뉴스 취재 및 기사 작성' },
-            { name: '편집자', category: '미디어', base_salary: 280000, required_education: 4, description: '콘텐츠 편집' },
-            { name: '방송 PD', category: '미디어', base_salary: 500000, required_education: 6, description: '방송 프로그램 제작' },
-            { name: '방송 작가', category: '미디어', base_salary: 350000, required_education: 4, description: '방송 대본 작성' },
-            { name: '유튜버', category: '미디어', base_salary: 200000, required_education: 0, description: '온라인 콘텐츠 크리에이터' },
-            { name: '인플루언서', category: '미디어', base_salary: 300000, required_education: 0, description: 'SNS 콘텐츠 제작' },
-            { name: '영상 편집자', category: '미디어', base_salary: 280000, required_education: 3, description: '영상 후반 작업' },
-            { name: '팟캐스터', category: '미디어', base_salary: 180000, required_education: 1, description: '팟캐스트 진행' },
-
-            // 요리/음식 (8개)
-            { name: '요리사', category: '요리', base_salary: 250000, required_education: 1, description: '음식 조리' },
-            { name: '셰프', category: '요리', base_salary: 500000, required_education: 3, description: '고급 요리 전문가' },
-            { name: '파티시에', category: '요리', base_salary: 300000, required_education: 2, description: '제과제빵 전문가' },
-            { name: '바리스타', category: '요리', base_salary: 180000, required_education: 1, description: '커피 전문가' },
-            { name: '소믈리에', category: '요리', base_salary: 400000, required_education: 3, description: '와인 전문가' },
-            { name: '푸드 스타일리스트', category: '요리', base_salary: 350000, required_education: 3, description: '음식 연출 전문가' },
-            { name: '영양 컨설턴트', category: '요리', base_salary: 220000, required_education: 4, description: '영양 관리 전문가' },
-            { name: '음식 평론가', category: '요리', base_salary: 300000, required_education: 4, description: '맛집 리뷰 전문가' },
-
-            // 농업/어업 (6개)
-            { name: '농부', category: '1차산업', base_salary: 180000, required_education: 0, description: '농작물 재배' },
-            { name: '어부', category: '1차산업', base_salary: 200000, required_education: 0, description: '수산물 채취' },
-            { name: '목장주', category: '1차산업', base_salary: 300000, required_education: 1, description: '축산업 경영' },
-            { name: '조경사', category: '1차산업', base_salary: 220000, required_education: 2, description: '정원 및 조경 설계' },
-            { name: '산림관리원', category: '1차산업', base_salary: 250000, required_education: 3, description: '산림 보호 및 관리' },
-            { name: '농업기술자', category: '1차산업', base_salary: 280000, required_education: 4, description: '농업 기술 개발' },
-
-            // 패션/뷰티 (8개)
-            { name: '패션 디자이너', category: '패션', base_salary: 350000, required_education: 4, description: '의류 디자인' },
-            { name: '모델', category: '패션', base_salary: 400000, required_education: 0, description: '패션 모델링' },
-            { name: '스타일리스트', category: '패션', base_salary: 300000, required_education: 2, description: '패션 코디네이션' },
-            { name: '메이크업 아티스트', category: '뷰티', base_salary: 250000, required_education: 1, description: '메이크업 전문가' },
-            { name: '네일 아티스트', category: '뷰티', base_salary: 200000, required_education: 1, description: '네일아트 전문가' },
-            { name: '헤어 디자이너', category: '뷰티', base_salary: 280000, required_education: 1, description: '헤어스타일링 전문가' },
-            { name: '피부관리사', category: '뷰티', base_salary: 220000, required_education: 1, description: '피부 관리 전문가' },
-            { name: '뷰티 유튜버', category: '뷰티', base_salary: 300000, required_education: 0, description: '뷰티 콘텐츠 크리에이터' },
-
-            // 부동산/건설 (8개)
-            { name: '부동산 중개사', category: '부동산', base_salary: 400000, required_education: 3, description: '부동산 거래 중개' },
-            { name: '건축 기사', category: '건설', base_salary: 350000, required_education: 4, description: '건축 설계 및 시공' },
-            { name: '토목 기사', category: '건설', base_salary: 380000, required_education: 4, description: '토목 공사 설계' },
-            { name: '인테리어 디자이너', category: '건설', base_salary: 300000, required_education: 3, description: '실내 공간 설계' },
-            { name: '시공 관리자', category: '건설', base_salary: 450000, required_education: 4, description: '건설 현장 관리' },
-            { name: '전기 기사', category: '건설', base_salary: 320000, required_education: 3, description: '전기 설비 설치' },
-            { name: '배관 기사', category: '건설', base_salary: 290000, required_education: 2, description: '배관 설비 설치' },
-            { name: '건설 현장 감독', category: '건설', base_salary: 500000, required_education: 5, description: '건설 공사 총괄 관리' },
-
-            // 운송/물류 (6개)
-            { name: '파일럿', category: '운송', base_salary: 1500000, required_education: 8, description: '항공기 조종' },
-            { name: '기차 기관사', category: '운송', base_salary: 400000, required_education: 4, description: '열차 운행' },
-            { name: '버스 기사', category: '운송', base_salary: 280000, required_education: 1, description: '버스 운전' },
-            { name: '택시 기사', category: '운송', base_salary: 200000, required_education: 0, description: '택시 운전' },
-            { name: '물류 관리사', category: '물류', base_salary: 350000, required_education: 4, description: '물류 체계 관리' },
-            { name: '창고 관리원', category: '물류', base_salary: 220000, required_education: 2, description: '창고 운영 관리' },
-
-            // 과학/연구 (10개)
-            { name: '물리학자', category: '과학', base_salary: 600000, required_education: 10, description: '물리학 연구' },
-            { name: '화학자', category: '과학', base_salary: 580000, required_education: 10, description: '화학 연구' },
-            { name: '생물학자', category: '과학', base_salary: 550000, required_education: 10, description: '생물학 연구' },
-            { name: '환경 과학자', category: '과학', base_salary: 480000, required_education: 8, description: '환경 연구' },
-            { name: '기상학자', category: '과학', base_salary: 450000, required_education: 8, description: '기상 예보 및 연구' },
-            { name: '지질학자', category: '과학', base_salary: 520000, required_education: 8, description: '지질 구조 연구' },
-            { name: '천문학자', category: '과학', base_salary: 650000, required_education: 10, description: '천체 연구' },
-            { name: '고고학자', category: '과학', base_salary: 350000, required_education: 8, description: '유적 발굴 및 연구' },
-            { name: '인류학자', category: '과학', base_salary: 400000, required_education: 8, description: '인류 문화 연구' },
-            { name: '실험실 연구원', category: '과학', base_salary: 380000, required_education: 6, description: '실험 및 분석' }
-        ];
+        // 기본 직업 데이터는 WorkSystem에서 관리
 
         // 기본 주식 데이터 (대폭 확장 - 100개 이상)
         const stocks = [
@@ -715,7 +564,7 @@ class Database {
         ];
 
         try {
-            await this.insertMultiple('jobs', jobs);
+            // jobs는 WorkSystem에서 관리하므로 제외
             await this.insertMultiple('stocks', stocks);
             await this.insertMultiple('pet_types', petTypes);
             await this.insertMultiple('items', items);
