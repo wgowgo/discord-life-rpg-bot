@@ -64,6 +64,20 @@ module.exports = {
             // 프로필 임베드 생성
             const embed = await player.createProfileEmbed(profileData);
 
+            // 새 플레이어인 경우 등록 완료 메시지 추가
+            if (isNewPlayer && targetUser.id === interaction.user.id) {
+                embed.setTitle('🎉 프로필 등록 완료!');
+                embed.setDescription('**Discord Life RPG에 오신 것을 환영합니다!**\n\n' + 
+                                   '새로운 캐릭터가 생성되었습니다. 이제 게임을 시작할 수 있습니다!');
+                embed.addFields(
+                    {
+                        name: '🚀 다음 단계',
+                        value: '1. `/직업 목록` - 직업 구하기\n2. `/도움말` - 게임 가이드 보기\n3. 채팅으로 돈과 경험치 획득',
+                        inline: false
+                    }
+                );
+            }
+
             // 먼저 프로필 응답
             await interaction.reply({ embeds: [embed] });
 
