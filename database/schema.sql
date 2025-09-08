@@ -320,6 +320,16 @@ CREATE TABLE IF NOT EXISTS player_tools (
     FOREIGN KEY (player_id) REFERENCES players(id)
 );
 
+-- 펫 종류
+CREATE TABLE IF NOT EXISTS pet_types (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    rarity TEXT NOT NULL,
+    stats_bonus TEXT,
+    price INTEGER DEFAULT 0
+);
+
 -- 개인 채널
 CREATE TABLE IF NOT EXISTS private_channels (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

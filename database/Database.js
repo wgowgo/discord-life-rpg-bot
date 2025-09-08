@@ -566,7 +566,7 @@ class Database {
         try {
             // jobs는 WorkSystem에서 관리하므로 제외
             await this.insertMultiple('stocks', stocks);
-            await this.insertMultiple('pet_types', petTypes);
+            // pet_types는 별도 시스템에서 관리하므로 제외
             await this.insertMultiple('items', items);
             await this.insertMultiple('achievements', achievements);
             await this.insertMultiple('titles', titles);
