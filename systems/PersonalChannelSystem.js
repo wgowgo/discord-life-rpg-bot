@@ -105,10 +105,14 @@ class PersonalChannelSystem {
      */
     async sendWelcomeMessage(channel, userId, username) {
         try {
+            // 메인 환영 임베드
             const welcomeEmbed = {
-                title: '🎉 개인 채널에 오신 것을 환영합니다!',
-                description: `안녕하세요, **${username}**님! 이곳은 당신만의 전용 채널입니다.`,
-                color: 0x00ff00,
+                title: '🎉 Discord Life RPG에 오신 것을 환영합니다!',
+                description: `안녕하세요, **${username}**님!\n이곳은 당신만의 전용 채널입니다. 🎮✨`,
+                color: 0x00BFFF,
+                thumbnail: {
+                    url: 'https://cdn.discordapp.com/emojis/1234567890123456789.png' // 게임 아이콘
+                },
                 fields: [
                     {
                         name: '🔒 개인 채널이란?',
@@ -118,16 +122,6 @@ class PersonalChannelSystem {
                     {
                         name: '🎮 주요 활용법',
                         value: '• 던전 탐험 시 실시간 진행상황\n• 개인 통계 및 상세 정보\n• 긴 결과 메시지들\n• 개인적인 게임 알림',
-                        inline: false
-                    },
-                    {
-                        name: '🚀 시작하기',
-                        value: '`/프로필`로 당신의 캐릭터를 확인해보세요!\n`/던전 목록`으로 모험을 시작할 수 있습니다.',
-                        inline: false
-                    },
-                    {
-                        name: '💡 팁',
-                        value: '이 채널은 삭제되지 않으니 언제든 돌아와서 활용하세요!',
                         inline: false
                     }
                 ],
@@ -142,18 +136,146 @@ class PersonalChannelSystem {
                 embeds: [welcomeEmbed] 
             });
 
-            // 추가 안내 메시지
-            await channel.send({
-                content: '📋 **자주 사용하는 명령어들:**\n' +
-                        '```\n' +
-                        '/프로필 - 내 캐릭터 정보\n' +
-                        '/던전 목록 - 던전 목록 확인\n' +
-                        '/상점 목록 - 아이템 상점\n' +
-                        '/주식 시장 - 주식 투자\n' +
-                        '/펫 상점 - 펫 구매\n' +
-                        '/업적 목록 - 내 업적 확인\n' +
-                        '```'
-            });
+            // 게임 시작 가이드 임베드
+            const gameGuideEmbed = {
+                title: '🚀 게임 시작 가이드',
+                description: '새로운 모험을 시작하기 전에 알아두면 좋은 것들입니다!',
+                color: 0xFF6B6B,
+                fields: [
+                    {
+                        name: '1️⃣ 캐릭터 확인',
+                        value: '`/프로필` - 내 캐릭터 정보와 스탯 확인',
+                        inline: true
+                    },
+                    {
+                        name: '2️⃣ 직업 구하기',
+                        value: '`/직업 목록` - 다양한 직업 중 선택',
+                        inline: true
+                    },
+                    {
+                        name: '3️⃣ 돈 벌기',
+                        value: '채팅과 음성 참여로 자동 보상!',
+                        inline: true
+                    },
+                    {
+                        name: '4️⃣ 모험 시작',
+                        value: '`/던전 목록` - 던전 탐험으로 경험치 획득',
+                        inline: true
+                    },
+                    {
+                        name: '5️⃣ 투자하기',
+                        value: '`/주식 시장` - 주식으로 돈 불리기',
+                        inline: true
+                    },
+                    {
+                        name: '6️⃣ 펫 키우기',
+                        value: '`/펫 상점` - 특별한 펫과 함께하기',
+                        inline: true
+                    }
+                ],
+                footer: {
+                    text: '단계별로 천천히 진행해보세요! 📚'
+                }
+            };
+
+            await channel.send({ embeds: [gameGuideEmbed] });
+
+            // 명령어 카테고리별 가이드
+            const commandsEmbed = {
+                title: '📋 명령어 가이드',
+                description: '게임의 모든 기능을 활용해보세요!',
+                color: 0x4ECDC4,
+                fields: [
+                    {
+                        name: '👤 기본 정보',
+                        value: '`/프로필` - 캐릭터 정보\n`/랭킹` - 서버 랭킹 확인',
+                        inline: true
+                    },
+                    {
+                        name: '💼 직업 & 사업',
+                        value: '`/직업 목록` - 직업 구하기\n`/사업 종류` - 사업 시작하기',
+                        inline: true
+                    },
+                    {
+                        name: '💰 투자 & 경제',
+                        value: '`/주식 시장` - 주식 투자\n`/상점 목록` - 아이템 구매',
+                        inline: true
+                    },
+                    {
+                        name: '🐾 펫 & 아이템',
+                        value: '`/펫 상점` - 펫 구매\n`/상점 인벤토리` - 내 아이템',
+                        inline: true
+                    },
+                    {
+                        name: '🏆 업적 & 칭호',
+                        value: '`/업적 목록` - 내 업적\n`/업적 전체` - 모든 업적',
+                        inline: true
+                    },
+                    {
+                        name: '⚔️ 모험 & 던전',
+                        value: '`/던전 목록` - 던전 탐험\n`/미니게임` - 재미있는 게임',
+                        inline: true
+                    }
+                ],
+                footer: {
+                    text: '모든 명령어는 슬래시(/)로 시작합니다! 💡'
+                }
+            };
+
+            await channel.send({ embeds: [commandsEmbed] });
+
+            // 게임 팁과 전략
+            const tipsEmbed = {
+                title: '💡 게임 팁 & 전략',
+                description: '더 효율적으로 게임을 즐기는 방법들입니다!',
+                color: 0xFFD93D,
+                fields: [
+                    {
+                        name: '🎯 초보자 추천 순서',
+                        value: '1. `/프로필`로 캐릭터 확인\n2. `/직업 지원`으로 직업 구하기\n3. 채팅으로 돈과 경험치 벌기\n4. `/상점 목록`에서 아이템 구매\n5. `/던전 목록`으로 모험 시작',
+                        inline: false
+                    },
+                    {
+                        name: '💰 돈 벌기 팁',
+                        value: '• 채팅할 때마다 자동으로 돈과 경험치 획득\n• 음성 채널 참여 시 시간당 보상\n• 직업 급여로 안정적인 수입\n• 주식 투자로 큰 수익 가능',
+                        inline: false
+                    },
+                    {
+                        name: '⚡ 효율적인 플레이',
+                        value: '• 펫을 활성화하면 보너스 효과\n• 업적 달성으로 특별한 칭호 획득\n• 던전에서 희귀 아이템 획득 가능\n• 랭킹 시스템으로 경쟁 재미',
+                        inline: false
+                    }
+                ],
+                footer: {
+                    text: '궁금한 것이 있으면 언제든 물어보세요! 🤔'
+                }
+            };
+
+            await channel.send({ embeds: [tipsEmbed] });
+
+            // 마지막 안내 메시지
+            const finalMessage = {
+                title: '🎊 준비 완료!',
+                description: '이제 게임을 시작할 준비가 되었습니다!',
+                color: 0x9B59B6,
+                fields: [
+                    {
+                        name: '🚀 지금 바로 시작하기',
+                        value: '`/프로필` 명령어를 입력해서 당신의 캐릭터를 확인해보세요!',
+                        inline: false
+                    },
+                    {
+                        name: '💬 도움이 필요하다면',
+                        value: '이 채널에서 언제든 질문하거나, 다른 채널에서 다른 플레이어들과 소통해보세요!',
+                        inline: false
+                    }
+                ],
+                footer: {
+                    text: '즐거운 게임 되세요! 🎮✨'
+                }
+            };
+
+            await channel.send({ embeds: [finalMessage] });
 
         } catch (error) {
             console.error('환영 메시지 전송 오류:', error);

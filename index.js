@@ -118,27 +118,41 @@ class LifeRPGBot {
             }
         });
 
-        // 슬래시 명령어 처리
+        // 슬래시 명령어 및 버튼 상호작용 처리
         this.client.on('interactionCreate', async interaction => {
-            if (!interaction.isChatInputCommand()) return;
+            // 슬래시 명령어 처리
+            if (interaction.isChatInputCommand()) {
+                const command = this.commands.get(interaction.commandName);
 
-            const command = this.commands.get(interaction.commandName);
+                if (!command) {
+                    console.error(`알 수 없는 명령어: ${interaction.commandName}`);
+                    return;
+                }
 
-            if (!command) {
-                console.error(`알 수 없는 명령어: ${interaction.commandName}`);
-                return;
+                try {
+                    await command.execute(interaction, this.db, this.personalChannelSystem);
+                } catch (error) {
+                    console.error('명령어 실행 오류:', error);
+                    const errorMessage = '명령어 실행 중 오류가 발생했습니다.';
+                    
+                    if (interaction.replied || interaction.deferred) {
+                        await interaction.followUp({ content: errorMessage, ephemeral: true });
+                    } else {
+                        await interaction.reply({ content: errorMessage, ephemeral: true });
+                    }
+                }
             }
-
-            try {
-                await command.execute(interaction, this.db, this.personalChannelSystem);
-            } catch (error) {
-                console.error('명령어 실행 오류:', error);
-                const errorMessage = '명령어 실행 중 오류가 발생했습니다.';
-                
-                if (interaction.replied || interaction.deferred) {
-                    await interaction.followUp({ content: errorMessage, ephemeral: true });
-                } else {
-                    await interaction.reply({ content: errorMessage, ephemeral: true });
+            // 버튼 상호작용 처리
+            else if (interaction.isButton()) {
+                try {
+                    await this.handleButtonInteraction(interaction);
+                } catch (error) {
+                    console.error('버튼 상호작용 오류:', error);
+                    if (interaction.replied || interaction.deferred) {
+                        await interaction.followUp({ content: '상호작용 처리 중 오류가 발생했습니다.', ephemeral: true });
+                    } else {
+                        await interaction.reply({ content: '상호작용 처리 중 오류가 발생했습니다.', ephemeral: true });
+                    }
                 }
             }
         });
@@ -457,6 +471,251 @@ class LifeRPGBot {
             
             await this.db.run(sql);
         }
+    }
+
+    /**
+     * 버튼 상호작용 처리
+     */
+    async handleButtonInteraction(interaction) {
+        const customId = interaction.customId;
+
+        // 도움말 버튼 처리
+        if (customId.startsWith('help_')) {
+            const category = customId.replace('help_', '');
+            const { EmbedBuilder } = require('discord.js');
+            
+            let embed;
+            switch (category) {
+                case 'start':
+                    embed = this.createStartGuideEmbed();
+                    break;
+                case 'basic':
+                    embed = this.createBasicCommandsEmbed();
+                    break;
+                case 'job':
+                    embed = this.createJobCommandsEmbed();
+                    break;
+                case 'economy':
+                    embed = this.createEconomyCommandsEmbed();
+                    break;
+                case 'pet':
+                    embed = this.createPetCommandsEmbed();
+                    break;
+                case 'achievement':
+                    embed = this.createAchievementCommandsEmbed();
+                    break;
+                case 'adventure':
+                    embed = this.createAdventureCommandsEmbed();
+                    break;
+                case 'tips':
+                    embed = this.createTipsEmbed();
+                    break;
+                default:
+                    embed = this.createStartGuideEmbed();
+            }
+
+            await interaction.update({ embeds: [embed] });
+        }
+        // 페이지네이션 버튼 처리
+        else if (customId.startsWith('page_')) {
+            const PaginationSystem = require('./systems/PaginationSystem');
+            const pagination = new PaginationSystem();
+            await pagination.handlePaginationInteraction(interaction);
+        }
+    }
+
+    // 도움말 임베드 생성 메서드들
+    createStartGuideEmbed() {
+        const { EmbedBuilder } = require('discord.js');
+        return new EmbedBuilder()
+            .setTitle('🎮 게임 시작 가이드')
+            .setDescription('새로운 모험을 시작하기 전에 알아두면 좋은 것들입니다!')
+            .setColor(0xFF6B6B)
+            .addFields(
+                {
+                    name: '1️⃣ 캐릭터 확인',
+                    value: '`/프로필` - 내 캐릭터 정보와 스탯 확인',
+                    inline: true
+                },
+                {
+                    name: '2️⃣ 직업 구하기',
+                    value: '`/직업 목록` - 다양한 직업 중 선택',
+                    inline: true
+                },
+                {
+                    name: '3️⃣ 돈 벌기',
+                    value: '채팅과 음성 참여로 자동 보상!',
+                    inline: true
+                },
+                {
+                    name: '4️⃣ 모험 시작',
+                    value: '`/던전 목록` - 던전 탐험으로 경험치 획득',
+                    inline: true
+                },
+                {
+                    name: '5️⃣ 투자하기',
+                    value: '`/주식 시장` - 주식으로 돈 불리기',
+                    inline: true
+                },
+                {
+                    name: '6️⃣ 펫 키우기',
+                    value: '`/펫 상점` - 특별한 펫과 함께하기',
+                    inline: true
+                }
+            )
+            .setFooter({ text: '단계별로 천천히 진행해보세요! 📚' });
+    }
+
+    createBasicCommandsEmbed() {
+        const { EmbedBuilder } = require('discord.js');
+        return new EmbedBuilder()
+            .setTitle('👤 기본 명령어')
+            .setDescription('게임의 기본적인 기능들입니다.')
+            .setColor(0x4ECDC4)
+            .addFields(
+                {
+                    name: '프로필 관련',
+                    value: '`/프로필 [유저]` - 캐릭터 정보 확인\n`/프로필 초기화` - 데이터 초기화 (2단계 확인)',
+                    inline: false
+                },
+                {
+                    name: '랭킹 시스템',
+                    value: '`/랭킹 부자` - 자산 기준 랭킹\n`/랭킹 레벨` - 레벨 기준 랭킹\n`/랭킹 업적` - 업적 기준 랭킹',
+                    inline: false
+                }
+            )
+            .setFooter({ text: '기본 명령어로 게임을 시작해보세요! 🚀' });
+    }
+
+    createJobCommandsEmbed() {
+        const { EmbedBuilder } = require('discord.js');
+        return new EmbedBuilder()
+            .setTitle('💼 직업 & 사업 명령어')
+            .setDescription('직업을 구하고 사업을 시작해보세요!')
+            .setColor(0x95E1D3)
+            .addFields(
+                {
+                    name: '직업 시스템',
+                    value: '`/직업 목록` - 구할 수 있는 직업 목록\n`/직업 지원 [직업ID]` - 직업에 지원\n`/직업 퇴사` - 현재 직장에서 퇴사\n`/직업 급여` - 이번 달 급여 수령',
+                    inline: false
+                },
+                {
+                    name: '사업 시스템',
+                    value: '`/사업 종류` - 사업 종류 목록\n`/사업 시작 [사업ID]` - 사업 시작\n`/사업 관리` - 사업 관리',
+                    inline: false
+                }
+            )
+            .setFooter({ text: '안정적인 수입을 위해 직업을 구해보세요! 💰' });
+    }
+
+    createEconomyCommandsEmbed() {
+        const { EmbedBuilder } = require('discord.js');
+        return new EmbedBuilder()
+            .setTitle('💰 투자 & 경제 명령어')
+            .setDescription('돈을 벌고 투자해보세요!')
+            .setColor(0xFFD93D)
+            .addFields(
+                {
+                    name: '주식 투자',
+                    value: '`/주식 시장` - 주식 시장 현황\n`/주식 매수 [종목] [수량]` - 주식 매수\n`/주식 매도 [종목] [수량]` - 주식 매도\n`/주식 포트폴리오` - 내 주식 포트폴리오',
+                    inline: false
+                },
+                {
+                    name: '상점 & 아이템',
+                    value: '`/상점 목록 [카테고리]` - 상점 아이템 목록\n`/상점 구매 [아이템ID] [수량]` - 아이템 구매\n`/상점 인벤토리` - 내 인벤토리 확인',
+                    inline: false
+                }
+            )
+            .setFooter({ text: '투자로 큰 수익을 올려보세요! 📈' });
+    }
+
+    createPetCommandsEmbed() {
+        const { EmbedBuilder } = require('discord.js');
+        return new EmbedBuilder()
+            .setTitle('🐾 펫 & 아이템 명령어')
+            .setDescription('특별한 펫과 함께 모험을 떠나보세요!')
+            .setColor(0xFF9FF3)
+            .addFields(
+                {
+                    name: '펫 시스템',
+                    value: '`/펫 상점` - 펫 상점 확인\n`/펫 구매 [펫ID] [이름]` - 펫 구매\n`/펫 목록` - 내 펫 목록\n`/펫 활성화 [펫ID]` - 펫 활성화\n`/펫 훈련` - 활성 펫 훈련',
+                    inline: false
+                },
+                {
+                    name: '아이템 관리',
+                    value: '`/상점 사용 [아이템ID]` - 아이템 사용\n`/상점 인벤토리` - 내 인벤토리 확인',
+                    inline: false
+                }
+            )
+            .setFooter({ text: '펫과 함께 더 강해져보세요! 🐕' });
+    }
+
+    createAchievementCommandsEmbed() {
+        const { EmbedBuilder } = require('discord.js');
+        return new EmbedBuilder()
+            .setTitle('🏆 업적 & 칭호 명령어')
+            .setDescription('다양한 업적을 달성하고 칭호를 수집해보세요!')
+            .setColor(0xFF6B6B)
+            .addFields(
+                {
+                    name: '업적 시스템',
+                    value: '`/업적 목록` - 내 업적 목록\n`/업적 전체` - 모든 업적 목록\n`/업적 도전과제` - 진행 중인 도전과제',
+                    inline: false
+                },
+                {
+                    name: '칭호 시스템',
+                    value: '`/업적 칭호 장착 [칭호ID]` - 칭호 장착\n`/업적 칭호 해제` - 칭호 해제',
+                    inline: false
+                }
+            )
+            .setFooter({ text: '업적을 달성해서 특별한 칭호를 얻어보세요! 🏅' });
+    }
+
+    createAdventureCommandsEmbed() {
+        const { EmbedBuilder } = require('discord.js');
+        return new EmbedBuilder()
+            .setTitle('⚔️ 모험 & 던전 명령어')
+            .setDescription('위험한 던전을 탐험하고 모험을 떠나보세요!')
+            .setColor(0x8B4513)
+            .addFields(
+                {
+                    name: '던전 시스템',
+                    value: '`/던전 목록` - 던전 목록 확인\n`/던전 입장 [던전ID]` - 던전 입장\n`/던전 전투` - 던전 내 전투',
+                    inline: false
+                },
+                {
+                    name: '미니게임',
+                    value: '`/미니게임` - 재미있는 미니게임 플레이',
+                    inline: false
+                }
+            )
+            .setFooter({ text: '던전에서 희귀한 아이템을 획득해보세요! ⚔️' });
+    }
+
+    createTipsEmbed() {
+        const { EmbedBuilder } = require('discord.js');
+        return new EmbedBuilder()
+            .setTitle('💡 게임 팁 & 전략')
+            .setDescription('더 효율적으로 게임을 즐기는 방법들입니다!')
+            .setColor(0x9B59B6)
+            .addFields(
+                {
+                    name: '🎯 초보자 추천 순서',
+                    value: '1. `/프로필`로 캐릭터 확인\n2. `/직업 지원`으로 직업 구하기\n3. 채팅으로 돈과 경험치 벌기\n4. `/상점 목록`에서 아이템 구매\n5. `/던전 목록`으로 모험 시작',
+                    inline: false
+                },
+                {
+                    name: '💰 돈 벌기 팁',
+                    value: '• 채팅할 때마다 자동으로 돈과 경험치 획득\n• 음성 채널 참여 시 시간당 보상\n• 직업 급여로 안정적인 수입\n• 주식 투자로 큰 수익 가능',
+                    inline: false
+                },
+                {
+                    name: '⚡ 효율적인 플레이',
+                    value: '• 펫을 활성화하면 보너스 효과\n• 업적 달성으로 특별한 칭호 획득\n• 던전에서 희귀 아이템 획득 가능\n• 랭킹 시스템으로 경쟁 재미',
+                    inline: false
+                }
+            )
+            .setFooter({ text: '궁금한 것이 있으면 언제든 물어보세요! 🤔' });
     }
 
     async shutdown() {
