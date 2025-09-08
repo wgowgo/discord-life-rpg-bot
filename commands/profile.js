@@ -76,6 +76,8 @@ module.exports = {
             }
 
             // 새 플레이어인 경우 - 프로필 생성
+            console.log(`새 플레이어 생성 시도 - 사용자: ${targetUser.username} (${targetUser.id})`);
+            
             const profileData = await player.getProfile(
                 targetUser.id, 
                 targetUser.displayName || targetUser.username,
@@ -83,6 +85,7 @@ module.exports = {
             );
             
             if (!profileData) {
+                console.log(`프로필 생성 실패 - 사용자: ${targetUser.username}`);
                 await interaction.reply({ 
                     content: '프로필을 생성할 수 없습니다. 나중에 다시 시도해주세요.', 
                     ephemeral: true 
@@ -93,6 +96,7 @@ module.exports = {
             const isNewPlayer = profileData.isNewPlayer || false;
             
             console.log(`회원가입 체크 - 사용자: ${targetUser.username}, isNewPlayer: ${isNewPlayer}`);
+            console.log(`플레이어 데이터:`, profileData.player ? '존재함' : '없음');
             
             // 프로필 임베드 생성
             const embed = await player.createProfileEmbed(profileData);

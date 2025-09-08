@@ -15,10 +15,14 @@ class Player {
             
             // 플레이어가 없으면 새로 생성 (createIfNotExists가 true일 때만)
             if (!player && username && createIfNotExists) {
-                await this.createPlayer(userId, username);
+                console.log(`새 플레이어 생성 중 - 사용자: ${username} (${userId})`);
+                const createResult = await this.createPlayer(userId, username);
+                console.log(`플레이어 생성 결과:`, createResult);
+                
                 player = await this.db.get(`
                     SELECT * FROM players WHERE id = ?
                 `, [userId]);
+                console.log(`생성된 플레이어 확인:`, player ? '성공' : '실패');
                 isNewPlayer = true;
             }
 
