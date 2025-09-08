@@ -43,10 +43,34 @@ module.exports = {
         const subcommand = interaction.options.getSubcommand();
         const userId = interaction.user.id;
 
-        // 교육 시스템 초기화 (최초 1회)
-        await educationSystem.initializeEducationSystem();
-
         try {
+            // 랭킹 명령어는 누구나 사용 가능
+            if (subcommand === '랭킹') {
+                await this.handleRanking(interaction, educationSystem);
+                return;
+            }
+
+            // 다른 명령어들은 회원가입 필요
+            const player = await db.get('SELECT * FROM players WHERE id = ?', [userId]);
+            if (!player) {
+                const embed = new (require('discord.js').EmbedBuilder)()
+                    .setColor('#ff0000')
+                    .setTitle('❌ 회원가입 필요')
+                    .setDescription('교육을 받으려면 먼저 회원가입을 해주세요!')
+                    .addFields({
+                        name: '💡 도움말',
+                        value: '`/프로필 회원가입` 명령어로 회원가입을 진행하세요.',
+                        inline: false
+                    })
+                    .setTimestamp();
+
+                await interaction.reply({ embeds: [embed], ephemeral: true });
+                return;
+            }
+
+            // 교육 시스템 초기화 (최초 1회)
+            await educationSystem.initializeEducationSystem();
+
             switch (subcommand) {
                 case '과정목록':
                     await this.handleCourseList(interaction, educationSystem, userId);
@@ -65,9 +89,6 @@ module.exports = {
                     break;
                 case '공부':
                     await this.handleDailyStudy(interaction, educationSystem, userId);
-                    break;
-                case '랭킹':
-                    await this.handleRanking(interaction, educationSystem);
                     break;
             }
         } catch (error) {

@@ -37,15 +37,36 @@ module.exports = {
         const userId = interaction.user.id;
 
         try {
+            // 상점 명령어는 누구나 사용 가능
+            if (subcommand === '상점') {
+                await this.handleShop(interaction, fishingSystem);
+                return;
+            }
+
+            // 다른 명령어들은 회원가입 필요
+            const player = await db.get('SELECT * FROM players WHERE id = ?', [userId]);
+            if (!player) {
+                const embed = new EmbedBuilder()
+                    .setColor('#ff0000')
+                    .setTitle('❌ 회원가입 필요')
+                    .setDescription('낚시를 하려면 먼저 회원가입을 해주세요!')
+                    .addFields({
+                        name: '💡 도움말',
+                        value: '`/프로필 회원가입` 명령어로 회원가입을 진행하세요.',
+                        inline: false
+                    })
+                    .setTimestamp();
+
+                await interaction.reply({ embeds: [embed], ephemeral: true });
+                return;
+            }
+
             switch (subcommand) {
                 case '시작':
                     await this.handleFishing(interaction, fishingSystem, userId);
                     break;
                 case '낚시대':
                     await this.handleRods(interaction, fishingSystem, userId);
-                    break;
-                case '상점':
-                    await this.handleShop(interaction, fishingSystem);
                     break;
                 case '구매':
                     await this.handleBuy(interaction, fishingSystem, userId);
