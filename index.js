@@ -100,7 +100,7 @@ class LifeRPGBot {
     }
 
     async setupEventHandlers() {
-        this.client.once('ready', () => {
+        this.client.once('clientReady', () => {
             console.log(`${this.client.user.tag}로 로그인했습니다!`);
             // 클라이언트 준비 후 개인 채널 시스템 초기화
             this.personalChannelSystem = new PersonalChannelSystem(this.client);
