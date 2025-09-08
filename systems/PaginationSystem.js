@@ -34,7 +34,7 @@ class PaginationSystem {
             .setTimestamp();
 
         if (category) {
-            // 카테고리별로 그룹화
+            // 카테고리별로 그룹화 (현재 페이지 아이템만)
             const categories = this.groupByCategory(pageItems, category);
             
             for (const [cat, catItems] of Object.entries(categories)) {

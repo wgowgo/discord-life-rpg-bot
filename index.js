@@ -23,6 +23,7 @@ const EducationSystem = require('./systems/EducationSystem');
 const PropertySystem = require('./systems/PropertySystem');
 const MinigameSystem = require('./systems/MinigameSystem');
 const PersonalChannelSystem = require('./systems/PersonalChannelSystem');
+const WorkSystem = require('./systems/WorkSystem');
 const cron = require('node-cron');
 
 class LifeRPGBot {
@@ -47,6 +48,7 @@ class LifeRPGBot {
         this.educationSystem = new EducationSystem(this.db);
         this.propertySystem = new PropertySystem(this.db);
         this.minigameSystem = new MinigameSystem(this.db);
+        this.workSystem = new WorkSystem(this.db);
         this.personalChannelSystem = null; // 클라이언트 준비 후 초기화
         
         this.init();
@@ -77,6 +79,7 @@ class LifeRPGBot {
             await this.businessSystem.initializeBusinessTypes();
             await this.educationSystem.initializeEducationSystem();
             await this.propertySystem.initializePropertySystem();
+            await this.workSystem.initializeJobs();
             console.log('모든 게임 시스템이 초기화되었습니다.');
         } catch (error) {
             console.error('시스템 초기화 오류:', error);

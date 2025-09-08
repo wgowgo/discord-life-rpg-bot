@@ -91,7 +91,7 @@ module.exports = {
         // 상승폭 상위 종목
         if (topMovers.gainers.length > 0) {
             const gainersText = topMovers.gainers.map(stock => 
-                `${stock.name} (${stock.symbol}): ${stock.current_price.toLocaleString()}원 (+${stock.change_percent.toFixed(2)}%)`
+                `**ID: ${stock.id}** | ${stock.name} (${stock.symbol}): ${stock.current_price.toLocaleString()}원 (+${stock.change_percent.toFixed(2)}%)`
             ).join('\n');
             
             embed.addFields({
@@ -104,7 +104,7 @@ module.exports = {
         // 하락폭 상위 종목
         if (topMovers.losers.length > 0) {
             const losersText = topMovers.losers.map(stock => 
-                `${stock.name} (${stock.symbol}): ${stock.current_price.toLocaleString()}원 (${stock.change_percent.toFixed(2)}%)`
+                `**ID: ${stock.id}** | ${stock.name} (${stock.symbol}): ${stock.current_price.toLocaleString()}원 (${stock.change_percent.toFixed(2)}%)`
             ).join('\n');
             
             embed.addFields({
@@ -118,7 +118,7 @@ module.exports = {
         const allStocksText = marketData.slice(0, 10).map(stock => {
             const changeIcon = stock.change_percent >= 0 ? '📈' : '📉';
             const changeText = stock.change_percent >= 0 ? `+${stock.change_percent.toFixed(2)}%` : `${stock.change_percent.toFixed(2)}%`;
-            return `${changeIcon} ${stock.name}: ${stock.current_price.toLocaleString()}원 (${changeText})`;
+            return `${changeIcon} **ID: ${stock.id}** | ${stock.name}: ${stock.current_price.toLocaleString()}원 (${changeText})`;
         }).join('\n');
 
         embed.addFields({
