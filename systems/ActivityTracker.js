@@ -1,9 +1,10 @@
 const { EmbedBuilder } = require('discord.js');
 
 class ActivityTracker {
-    constructor(database, config) {
+    constructor(database, config, client) {
         this.db = database;
         this.config = config;
+        this.client = client;
         this.chatCooldowns = new Map(); // 채팅 쿨다운 관리
         this.voiceSessions = new Map(); // 음성 세션 관리
     }
@@ -41,15 +42,20 @@ class ActivityTracker {
             await this.checkAchievements(userId, 'chat');
             await this.updateChallengeProgress(userId, 'chat_count', 1);
 
-            // 보상 알림 (확률적으로)
+            // 보상 알림 (확률적으로) - 개인 메시지로 전송
             if (Math.random() < 0.1) { // 10% 확률로 알림
                 const embed = new EmbedBuilder()
-                    .setColor('#00ff00')
+                    .setColor(0x00FF00)
                     .setTitle('🎉 채팅 보상!')
                     .setDescription(`${reward.money}원을 획득했습니다!\n경험치 +${reward.experience}`)
                     .setTimestamp();
 
-                await message.reply({ embeds: [embed] });
+                try {
+                    await message.author.send({ embeds: [embed] });
+                } catch (error) {
+                    // DM을 보낼 수 없는 경우 (차단 등) 무시
+                    console.log(`${message.author.username}에게 DM을 보낼 수 없습니다.`);
+                }
             }
 
         } catch (error) {
@@ -112,10 +118,42 @@ class ActivityTracker {
             await this.checkAchievements(userId, 'voice');
             await this.updateChallengeProgress(userId, 'voice_minutes', duration);
 
+            // 음성채팅 보상 알림 (개인 메시지로 전송)
+            if (reward.money > 0 || reward.experience > 0) {
+                const embed = new EmbedBuilder()
+                    .setColor(0x0099FF)
+                    .setTitle('🎤 음성채팅 보상!')
+                    .setDescription(`${duration}분 동안 음성채팅을 하여 보상을 받았습니다!\n\n` +
+                                   `💰 ${reward.money}원 획득\n` +
+                                   `⭐ 경험치 +${reward.experience}`)
+                    .setTimestamp();
+
+                try {
+                    const user = await this.getUserById(userId);
+                    if (user) {
+                        await user.send({ embeds: [embed] });
+                    }
+                } catch (error) {
+                    console.log(`사용자 ${userId}에게 음성채팅 보상 DM을 보낼 수 없습니다.`);
+                }
+            }
+
             this.voiceSessions.delete(userId);
 
         } catch (error) {
             console.error('음성 세션 종료 오류:', error);
+        }
+    }
+
+    async getUserById(userId) {
+        try {
+            if (this.client) {
+                return await this.client.users.fetch(userId);
+            }
+            return null;
+        } catch (error) {
+            console.error('사용자 정보 가져오기 오류:', error);
+            return null;
         }
     }
 

@@ -39,7 +39,7 @@ class LifeRPGBot {
 
         this.commands = new Collection();
         this.db = new Database(config.database.filename);
-        this.activityTracker = new ActivityTracker(this.db, config);
+        this.activityTracker = new ActivityTracker(this.db, config, this.client);
         this.stockMarket = new StockMarket(this.db);
         this.dungeonSystem = new DungeonSystem(this.db);
         this.romanceSystem = new RomanceSystem(this.db);
