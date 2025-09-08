@@ -207,7 +207,7 @@ class Database {
             { name: '바리스타', category: '요리', base_salary: 180000, required_education: 1, description: '커피 전문가' },
             { name: '소믈리에', category: '요리', base_salary: 400000, required_education: 3, description: '와인 전문가' },
             { name: '푸드 스타일리스트', category: '요리', base_salary: 350000, required_education: 3, description: '음식 연출 전문가' },
-            { name: '영양사', category: '요리', base_salary: 220000, required_education: 4, description: '영양 관리 전문가' },
+            { name: '영양 컨설턴트', category: '요리', base_salary: 220000, required_education: 4, description: '영양 관리 전문가' },
             { name: '음식 평론가', category: '요리', base_salary: 300000, required_education: 4, description: '맛집 리뷰 전문가' },
 
             // 농업/어업 (6개)

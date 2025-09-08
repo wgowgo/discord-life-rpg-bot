@@ -70,14 +70,42 @@ module.exports = {
         const subcommand = interaction.options.getSubcommand();
         const userId = interaction.user.id;
 
-        // 사업 시스템 초기화 (최초 1회)
-        await businessSystem.initializeBusinessTypes();
-
         try {
-            switch (subcommand) {
-                case '종류':
+            // 종류와 랭킹 명령어는 누구나 사용 가능
+            if (subcommand === '종류' || subcommand === '랭킹') {
+                // 사업 시스템 초기화 (최초 1회)
+                await businessSystem.initializeBusinessTypes();
+                
+                if (subcommand === '종류') {
                     await this.handleTypes(interaction, businessSystem);
-                    break;
+                } else {
+                    await this.handleRanking(interaction, businessSystem);
+                }
+                return;
+            }
+
+            // 다른 명령어들은 회원가입 필요
+            const player = await db.get('SELECT * FROM players WHERE id = ?', [userId]);
+            if (!player) {
+                const embed = new (require('discord.js').EmbedBuilder)()
+                    .setColor('#ff0000')
+                    .setTitle('❌ 회원가입 필요')
+                    .setDescription('사업을 운영하려면 먼저 회원가입을 해주세요!')
+                    .addFields({
+                        name: '💡 도움말',
+                        value: '`/프로필 회원가입` 명령어로 회원가입을 진행하세요.',
+                        inline: false
+                    })
+                    .setTimestamp();
+
+                await interaction.reply({ embeds: [embed], ephemeral: true });
+                return;
+            }
+
+            // 사업 시스템 초기화 (최초 1회)
+            await businessSystem.initializeBusinessTypes();
+
+            switch (subcommand) {
                 case '창업':
                     await this.handleStart(interaction, businessSystem, userId);
                     break;
@@ -95,9 +123,6 @@ module.exports = {
                     break;
                 case '매각':
                     await this.handleSell(interaction, businessSystem, userId);
-                    break;
-                case '랭킹':
-                    await this.handleRanking(interaction, businessSystem);
                     break;
             }
         } catch (error) {

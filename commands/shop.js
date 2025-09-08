@@ -52,10 +52,31 @@ module.exports = {
         const userId = interaction.user.id;
 
         try {
+            // 목록 명령어는 누구나 사용 가능
+            if (subcommand === '목록') {
+                await this.handleShopList(interaction, db);
+                return;
+            }
+
+            // 다른 명령어들은 회원가입 필요
+            const player = await db.get('SELECT * FROM players WHERE id = ?', [userId]);
+            if (!player) {
+                const embed = new (require('discord.js').EmbedBuilder)()
+                    .setColor('#ff0000')
+                    .setTitle('❌ 회원가입 필요')
+                    .setDescription('상점을 이용하려면 먼저 회원가입을 해주세요!')
+                    .addFields({
+                        name: '💡 도움말',
+                        value: '`/프로필 회원가입` 명령어로 회원가입을 진행하세요.',
+                        inline: false
+                    })
+                    .setTimestamp();
+
+                await interaction.reply({ embeds: [embed], ephemeral: true });
+                return;
+            }
+
             switch (subcommand) {
-                case '목록':
-                    await this.handleShopList(interaction, db);
-                    break;
                 case '구매':
                     await this.handleBuy(interaction, db, userId);
                     break;
