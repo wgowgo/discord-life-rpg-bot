@@ -99,9 +99,13 @@ class AchievementSystem {
     }
 
     async initializeAchievementSystem() {
+        // 기존 테이블이 있다면 삭제하고 새로 생성 (스키마 변경 대응)
+        await this.db.run(`DROP TABLE IF EXISTS achievements`).catch(() => {});
+        await this.db.run(`DROP TABLE IF EXISTS player_achievements`).catch(() => {});
+
         // 업적 테이블 생성
         await this.db.run(`
-            CREATE TABLE IF NOT EXISTS achievements (
+            CREATE TABLE achievements (
                 id TEXT PRIMARY KEY,
                 name TEXT NOT NULL,
                 description TEXT NOT NULL,
@@ -113,11 +117,6 @@ class AchievementSystem {
                 reward_exp INTEGER DEFAULT 0
             )
         `);
-
-        // 기존 테이블에 icon 컬럼 추가 (없는 경우)
-        await this.db.run(`
-            ALTER TABLE achievements ADD COLUMN icon TEXT DEFAULT '🏆'
-        `).catch(() => {}); // 이미 존재하면 무시
 
         // 플레이어 업적 테이블 생성
         await this.db.run(`

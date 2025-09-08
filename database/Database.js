@@ -15,15 +15,26 @@ class Database {
                 console.log('DATABASE_URL 발견, PostgreSQL 연결 시도 중...');
                 console.log('DATABASE_URL:', process.env.DATABASE_URL.substring(0, 20) + '...');
                 
-                this.client = new Client({
-                    connectionString: process.env.DATABASE_URL,
-                    ssl: {
-                        rejectUnauthorized: false
+                try {
+                    // DATABASE_URL 파싱 및 검증
+                    const url = new URL(process.env.DATABASE_URL);
+                    if (!url.protocol || !url.hostname) {
+                        throw new Error('Invalid DATABASE_URL format');
                     }
-                });
-                await this.client.connect();
-                console.log('PostgreSQL 데이터베이스에 연결되었습니다.');
-                await this.createTables();
+                    
+                    this.client = new Client({
+                        connectionString: process.env.DATABASE_URL,
+                        ssl: {
+                            rejectUnauthorized: false
+                        }
+                    });
+                    await this.client.connect();
+                    console.log('PostgreSQL 데이터베이스에 연결되었습니다.');
+                    await this.createTables();
+                } catch (pgError) {
+                    console.error('PostgreSQL 연결 실패:', pgError.message);
+                    throw pgError;
+                }
             } else {
                 console.log('DATABASE_URL이 없거나 비어있음, SQLite 사용');
                 // 로컬 개발용 SQLite 연결
