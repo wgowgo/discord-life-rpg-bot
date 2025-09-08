@@ -7,8 +7,8 @@ module.exports = {
         .setDescription('프로필 관련 명령어')
         .addSubcommand(subcommand =>
             subcommand
-                .setName('등록')
-                .setDescription('게임에 참여하기 위해 프로필을 등록합니다'))
+                .setName('회원가입')
+                .setDescription('게임에 참여하기 위해 회원가입합니다'))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('보기')
@@ -29,7 +29,7 @@ module.exports = {
 
         try {
             switch (subcommand) {
-                case '등록':
+                case '회원가입':
                     await this.handleRegisterProfile(interaction, db, personalChannelSystem);
                     break;
                 case '보기':
@@ -72,9 +72,9 @@ module.exports = {
             // 프로필 임베드 생성
             const embed = await player.createProfileEmbed(profileData);
 
-            // 새 플레이어인 경우 등록 완료 메시지 추가
+            // 새 플레이어인 경우 회원가입 완료 메시지 추가
             if (isNewPlayer) {
-                embed.setTitle('🎉 프로필 등록 완료!');
+                embed.setTitle('🎉 회원가입 완료!');
                 embed.setDescription('**Discord Life RPG에 오신 것을 환영합니다!**\n\n' + 
                                    '새로운 캐릭터가 생성되었습니다. 이제 게임을 시작할 수 있습니다!');
                 embed.addFields(
@@ -92,7 +92,7 @@ module.exports = {
                 embed.setColor(0x00FF00); // 초록색
             } else {
                 embed.setTitle('👤 프로필 정보');
-                embed.setDescription('이미 등록된 프로필입니다.');
+                embed.setDescription('이미 회원가입된 계정입니다.');
                 embed.setColor(0x5865F2); // Discord 블루
             }
 
@@ -143,9 +143,9 @@ module.exports = {
             }
 
         } catch (error) {
-            console.error('프로필 등록 오류:', error);
+            console.error('회원가입 오류:', error);
             await interaction.reply({ 
-                content: '프로필 등록 중 오류가 발생했습니다.', 
+                content: '회원가입 중 오류가 발생했습니다.', 
                 ephemeral: true 
             });
         }
@@ -165,7 +165,7 @@ module.exports = {
             
             if (!profileData) {
                 await interaction.reply({ 
-                    content: '등록된 프로필이 없습니다. `/프로필 등록` 명령어로 먼저 등록해주세요.', 
+                    content: '등록된 프로필이 없습니다. `/프로필 회원가입` 명령어로 먼저 회원가입해주세요.', 
                     ephemeral: true 
                 });
                 return;
@@ -251,11 +251,11 @@ module.exports = {
                                        '• 기존 개인 채널 삭제\n' +
                                        '• 모든 게임 데이터 초기화\n' +
                                        '• 새로운 캐릭터 생성\n\n' +
-                                       '`/프로필 등록` 명령어로 새 캐릭터를 확인하고 개인 채널을 다시 생성하세요! 🎮')
+                                       '`/프로필 회원가입` 명령어로 새 캐릭터를 확인하고 개인 채널을 다시 생성하세요! 🎮')
                         .addFields(
                             {
                                 name: '🚀 다음 단계',
-                                value: '1. `/프로필 등록` - 새 캐릭터 확인 및 개인 채널 생성\n2. `/직업 목록` - 직업 구하기\n3. `/도움말` - 게임 가이드 보기',
+                                value: '1. `/프로필 회원가입` - 새 캐릭터 확인 및 개인 채널 생성\n2. `/직업 목록` - 직업 구하기\n3. `/도움말` - 게임 가이드 보기',
                                 inline: false
                             }
                         )

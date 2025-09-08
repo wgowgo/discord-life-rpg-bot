@@ -144,7 +144,7 @@ class PersonalChannelSystem {
                 fields: [
                     {
                         name: '1️⃣ 캐릭터 등록',
-                        value: '`/프로필 등록` - 게임 참여를 위해 프로필 등록',
+                        value: '`/프로필 회원가입` - 게임 참여를 위해 회원가입',
                         inline: true
                     },
                     {
@@ -188,7 +188,7 @@ class PersonalChannelSystem {
                 fields: [
                     {
                         name: '👤 기본 정보',
-                        value: '`/프로필 등록` - 프로필 등록\n`/프로필 보기` - 캐릭터 정보\n`/랭킹` - 서버 랭킹 확인',
+                        value: '`/프로필 회원가입` - 회원가입\n`/프로필 보기` - 캐릭터 정보\n`/랭킹` - 서버 랭킹 확인',
                         inline: true
                     },
                     {
@@ -232,7 +232,7 @@ class PersonalChannelSystem {
                 fields: [
                     {
                         name: '🎯 초보자 추천 순서',
-                        value: '1. `/프로필 등록`으로 게임 참여\n2. `/직업 목록`에서 직업 구하기\n3. 채팅으로 돈과 경험치 벌기\n4. `/상점 목록`에서 아이템 구매\n5. `/던전 목록`으로 모험 시작',
+                        value: '1. `/프로필 회원가입`으로 게임 참여\n2. `/직업 목록`에서 직업 구하기\n3. 채팅으로 돈과 경험치 벌기\n4. `/상점 목록`에서 아이템 구매\n5. `/던전 목록`으로 모험 시작',
                         inline: false
                     },
                     {
@@ -261,7 +261,7 @@ class PersonalChannelSystem {
                 fields: [
                     {
                         name: '🚀 지금 바로 시작하기',
-                        value: '`/프로필 등록` 명령어로 게임에 참여하고 캐릭터를 확인해보세요!',
+                        value: '`/프로필 회원가입` 명령어로 게임에 참여하고 캐릭터를 확인해보세요!',
                         inline: false
                     },
                     {
