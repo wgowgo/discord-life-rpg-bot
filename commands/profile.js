@@ -226,12 +226,51 @@ module.exports = {
                     .setColor(0x4CAF50)
                     .setTitle('✅ 초기화 완료')
                     .setDescription('프로필 데이터가 성공적으로 초기화되었습니다!\n\n' +
-                                   '새로운 게임을 시작할 준비가 되었습니다! 🎮')
+                                   '**새로운 캐릭터가 자동으로 생성되었습니다!**\n' +
+                                   '`/프로필` 명령어로 새 캐릭터를 확인해보세요! 🎮')
+                    .addFields(
+                        {
+                            name: '🚀 다음 단계',
+                            value: '1. `/프로필` - 새 캐릭터 확인\n2. `/직업 목록` - 직업 구하기\n3. `/도움말` - 게임 가이드 보기',
+                            inline: false
+                        }
+                    )
                     .setFooter({ text: '새로운 모험을 시작해보세요!' });
 
                 await message.reply({
                     embeds: [successEmbed]
                 });
+
+                // 개인 채널에서도 안내 메시지 전송
+                try {
+                    const personalChannelSystem = require('../systems/PersonalChannelSystem');
+                    const channelSystem = new personalChannelSystem(interaction.client);
+                    const personalChannel = await channelSystem.findPersonalChannel(interaction.guild.id, userId);
+                    
+                    if (personalChannel) {
+                        const channelEmbed = new EmbedBuilder()
+                            .setColor(0x00BFFF)
+                            .setTitle('🎉 새로운 시작!')
+                            .setDescription('프로필이 초기화되어 새로운 캐릭터로 시작합니다!')
+                            .addFields(
+                                {
+                                    name: '🎮 게임 시작하기',
+                                    value: '`/프로필` - 새 캐릭터 확인\n`/직업 목록` - 직업 구하기\n`/도움말` - 게임 가이드',
+                                    inline: false
+                                },
+                                {
+                                    name: '💡 초보자 팁',
+                                    value: '• 채팅으로 돈과 경험치 획득\n• 직업을 구해 안정적인 수입 확보\n• 던전 탐험으로 아이템 획득',
+                                    inline: false
+                                }
+                            )
+                            .setFooter({ text: '새로운 모험을 즐겨보세요! 🚀' });
+
+                        await personalChannel.send({ embeds: [channelEmbed] });
+                    }
+                } catch (error) {
+                    console.error('개인 채널 안내 메시지 전송 오류:', error);
+                }
 
                 console.log(`플레이어 ${userId}의 데이터가 초기화되었습니다.`);
             } catch (error) {
