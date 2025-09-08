@@ -80,13 +80,20 @@ module.exports = {
                 embed.addFields(
                     {
                         name: '🚀 다음 단계',
-                        value: '1. `/직업 목록` - 직업 구하기\n2. `/도움말` - 게임 가이드 보기\n3. 채팅으로 돈과 경험치 획득',
+                        value: '1. **`/직업 목록`** - 직업 구하기\n2. **`/도움말`** - 게임 가이드 보기\n3. **`/상점 목록`** - 아이템 구매\n4. **`/미니게임`** - 재미있는 게임\n5. **채팅** - 돈과 경험치 획득',
+                        inline: false
+                    },
+                    {
+                        name: '💡 팁',
+                        value: '• 개인 채널에서 더 자세한 가이드를 확인하세요!\n• 매일 로그인하면 보너스를 받을 수 있습니다!',
                         inline: false
                     }
                 );
+                embed.setColor(0x00FF00); // 초록색
             } else {
                 embed.setTitle('👤 프로필 정보');
                 embed.setDescription('이미 등록된 프로필입니다.');
+                embed.setColor(0x5865F2); // Discord 블루
             }
 
             // 먼저 프로필 응답
@@ -103,6 +110,32 @@ module.exports = {
 
                     if (personalChannel) {
                         console.log(`새 플레이어 ${targetUser.username}의 개인 채널 생성됨: ${personalChannel.name}`);
+                        
+                        // 개인 채널 생성 완료 안내
+                        setTimeout(async () => {
+                            try {
+                                const followUpEmbed = new EmbedBuilder()
+                                    .setTitle('🎯 개인 채널 생성 완료!')
+                                    .setDescription(`**${personalChannel.name}** 채널이 생성되었습니다!\n\n` +
+                                                   '이 채널에서 더 자세한 게임 가이드와 개인 통계를 확인할 수 있습니다.')
+                                    .addFields(
+                                        {
+                                            name: '📋 개인 채널 기능',
+                                            value: '• 상세한 게임 가이드\n• 개인 통계 및 성취도\n• 개인 설정 및 알림\n• 게임 팁 및 공략',
+                                            inline: false
+                                        }
+                                    )
+                                    .setColor(0x9932CC)
+                                    .setTimestamp();
+
+                                await interaction.followUp({ 
+                                    embeds: [followUpEmbed], 
+                                    ephemeral: true 
+                                });
+                            } catch (error) {
+                                console.error('개인 채널 안내 메시지 오류:', error);
+                            }
+                        }, 2000); // 2초 후 전송
                     }
                 } catch (error) {
                     console.error('개인 채널 생성 오류:', error);
