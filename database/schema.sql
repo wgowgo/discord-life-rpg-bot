@@ -314,3 +314,10 @@ CREATE TABLE IF NOT EXISTS gambling_records (
     FOREIGN KEY (player_id) REFERENCES players(id)
 );
 
+-- 직업 퇴사 쿨다운
+CREATE TABLE IF NOT EXISTS job_cooldowns (
+    player_id TEXT PRIMARY KEY,
+    quit_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (player_id) REFERENCES players(id)
+);
+

@@ -174,16 +174,98 @@ module.exports = {
             return;
         }
 
+        // 퇴사 쿨다운 확인
+        const cooldown = await db.get(`
+            SELECT * FROM job_cooldowns WHERE player_id = ?
+        `, [userId]);
+
+        if (cooldown) {
+            const quitTime = new Date(cooldown.quit_time);
+            const now = new Date();
+            const timeDiff = now - quitTime;
+            const oneHour = 60 * 60 * 1000; // 1시간을 밀리초로
+
+            if (timeDiff < oneHour) {
+                const remainingTime = oneHour - timeDiff;
+                const remainingMinutes = Math.ceil(remainingTime / (60 * 1000));
+                
+                const embed = new EmbedBuilder()
+                    .setColor('#ff9900')
+                    .setTitle('⏰ 재취업 쿨다운')
+                    .setDescription('퇴사 후 1시간 동안은 새로운 직업에 지원할 수 없습니다.')
+                    .addFields({
+                        name: '⏳ 남은 시간',
+                        value: `${remainingMinutes}분`,
+                        inline: true
+                    })
+                    .setFooter({ text: '조금만 기다려주세요!' });
+
+                await interaction.reply({ embeds: [embed], ephemeral: true });
+                return;
+            } else {
+                // 쿨다운이 끝났으면 기록 삭제
+                await db.run(`DELETE FROM job_cooldowns WHERE player_id = ?`, [userId]);
+            }
+        }
+
         // 플레이어 스탯 확인
         const stats = await db.get('SELECT * FROM player_stats WHERE player_id = ?', [userId]);
         
         // 교육 수준 확인
         if (stats.education < job.required_education) {
-            await interaction.reply({ 
-                content: `교육 수준이 부족합니다. 필요: ${job.required_education}년, 현재: ${stats.education}년`, 
-                ephemeral: true 
-            });
+            const embed = new EmbedBuilder()
+                .setColor('#ff0000')
+                .setTitle('❌ 지원 불가')
+                .setDescription(`${job.name}에 지원할 수 없습니다.`)
+                .addFields({
+                    name: '📚 교육 수준 부족',
+                    value: `필요: ${job.required_education}년\n현재: ${stats.education}년`,
+                    inline: true
+                })
+                .setFooter({ text: '교육을 통해 수준을 높이세요!' });
+
+            await interaction.reply({ embeds: [embed], ephemeral: true });
             return;
+        }
+
+        // 스탯 요구사항 확인
+        if (job.required_stats) {
+            try {
+                const requiredStats = JSON.parse(job.required_stats);
+                const missingStats = [];
+                
+                for (const [stat, requiredValue] of Object.entries(requiredStats)) {
+                    const currentValue = stats[stat] || 0;
+                    if (currentValue < requiredValue) {
+                        const statNames = {
+                            'intelligence': '지능',
+                            'charm': '매력',
+                            'strength': '근력',
+                            'agility': '민첩성',
+                            'luck': '행운'
+                        };
+                        missingStats.push(`${statNames[stat] || stat}: ${currentValue}/${requiredValue}`);
+                    }
+                }
+                
+                if (missingStats.length > 0) {
+                    const embed = new EmbedBuilder()
+                        .setColor('#ff0000')
+                        .setTitle('❌ 지원 불가')
+                        .setDescription(`${job.name}에 지원할 수 없습니다.`)
+                        .addFields({
+                            name: '⭐ 스탯 부족',
+                            value: missingStats.join('\n'),
+                            inline: true
+                        })
+                        .setFooter({ text: '스탯을 향상시켜 다시 도전하세요!' });
+
+                    await interaction.reply({ embeds: [embed], ephemeral: true });
+                    return;
+                }
+            } catch (e) {
+                // JSON 파싱 실패 시 무시
+            }
         }
 
         // 면접 성공 확률 계산 (스탯 기반)
@@ -272,6 +354,12 @@ module.exports = {
             WHERE player_id = ? AND is_current = TRUE
         `, [userId]);
 
+        // 퇴사 쿨다운 기록
+        await db.run(`
+            INSERT OR REPLACE INTO job_cooldowns (player_id, quit_time)
+            VALUES (?, CURRENT_TIMESTAMP)
+        `, [userId]);
+
         // 퇴직금 지급 (근무일수 기반)
         const workDays = Math.floor((Date.now() - new Date(currentJob.start_date).getTime()) / (1000 * 60 * 60 * 24));
         const severancePay = Math.floor((currentJob.salary / 30) * Math.min(workDays, 30)); // 최대 1개월치
@@ -289,11 +377,18 @@ module.exports = {
             .setColor('#ffff00')
             .setTitle('👋 퇴사 완료')
             .setDescription(`${currentJob.job_name}에서 퇴사했습니다.`)
-            .addFields({
-                name: '💰 퇴직금',
-                value: `${severancePay.toLocaleString()}원`,
-                inline: true
-            });
+            .addFields(
+                {
+                    name: '💰 퇴직금',
+                    value: `${severancePay.toLocaleString()}원`,
+                    inline: true
+                },
+                {
+                    name: '⏰ 재취업 쿨다운',
+                    value: '1시간 후 새로운 직업에 지원할 수 있습니다.',
+                    inline: true
+                }
+            );
 
         await interaction.reply({ embeds: [embed] });
     },

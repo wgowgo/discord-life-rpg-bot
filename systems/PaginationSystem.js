@@ -204,10 +204,39 @@ class PaginationSystem {
 
     // 직업 포맷터
     formatJob(job) {
+        const requirements = [];
+        
+        // 교육 요구사항
+        if (job.required_education > 0) {
+            requirements.push(`📚 교육: ${job.required_education}년 이상`);
+        }
+        
+        // 스탯 요구사항 (JSON 파싱)
+        if (job.required_stats) {
+            try {
+                const stats = JSON.parse(job.required_stats);
+                for (const [stat, value] of Object.entries(stats)) {
+                    const statNames = {
+                        'intelligence': '지능',
+                        'charm': '매력',
+                        'strength': '근력',
+                        'agility': '민첩성',
+                        'luck': '행운'
+                    };
+                    requirements.push(`⭐ ${statNames[stat] || stat}: ${value} 이상`);
+                }
+            } catch (e) {
+                // JSON 파싱 실패 시 무시
+            }
+        }
+        
+        const reqText = requirements.length > 0 ? requirements.join('\n') : '요구사항 없음';
+        
         return [
-            `**${job.name}**`,
+            `**ID: ${job.id} | ${job.name}**`,
             `💰 급여: ${job.base_salary.toLocaleString()}원`,
-            `📚 필요 교육: ${job.required_education}레벨`,
+            `📋 요구사항:`,
+            reqText,
             `📝 ${job.description}`
         ].join('\n');
     }
