@@ -234,18 +234,21 @@ module.exports = {
         messageCollector.on('collect', async (message) => {
             try {
                 // 데이터 초기화 실행
-                await this.performDataReset(db, userId);
+                await this.performDataReset(db, userId, interaction);
                 
                 const successEmbed = new EmbedBuilder()
                     .setColor(0x4CAF50)
                     .setTitle('✅ 초기화 완료')
                     .setDescription('프로필 데이터가 성공적으로 초기화되었습니다!\n\n' +
-                                   '**새로운 캐릭터가 자동으로 생성되었습니다!**\n' +
-                                   '`/프로필` 명령어로 새 캐릭터를 확인해보세요! 🎮')
+                                   '**다음이 완료되었습니다:**\n' +
+                                   '• 기존 개인 채널 삭제\n' +
+                                   '• 모든 게임 데이터 초기화\n' +
+                                   '• 새로운 캐릭터 생성\n\n' +
+                                   '`/프로필` 명령어로 새 캐릭터를 확인하고 개인 채널을 다시 생성하세요! 🎮')
                     .addFields(
                         {
                             name: '🚀 다음 단계',
-                            value: '1. `/프로필` - 새 캐릭터 확인\n2. `/직업 목록` - 직업 구하기\n3. `/도움말` - 게임 가이드 보기',
+                            value: '1. `/프로필` - 새 캐릭터 확인 및 개인 채널 생성\n2. `/직업 목록` - 직업 구하기\n3. `/도움말` - 게임 가이드 보기',
                             inline: false
                         }
                     )
@@ -255,36 +258,7 @@ module.exports = {
                     embeds: [successEmbed]
                 });
 
-                // 개인 채널에서도 안내 메시지 전송
-                try {
-                    const personalChannelSystem = require('../systems/PersonalChannelSystem');
-                    const channelSystem = new personalChannelSystem(interaction.client);
-                    const personalChannel = await channelSystem.findPersonalChannel(interaction.guild.id, userId);
-                    
-                    if (personalChannel) {
-                        const channelEmbed = new EmbedBuilder()
-                            .setColor(0x00BFFF)
-                            .setTitle('🎉 새로운 시작!')
-                            .setDescription('프로필이 초기화되어 새로운 캐릭터로 시작합니다!')
-                            .addFields(
-                                {
-                                    name: '🎮 게임 시작하기',
-                                    value: '`/프로필` - 새 캐릭터 확인\n`/직업 목록` - 직업 구하기\n`/도움말` - 게임 가이드',
-                                    inline: false
-                                },
-                                {
-                                    name: '💡 초보자 팁',
-                                    value: '• 채팅으로 돈과 경험치 획득\n• 직업을 구해 안정적인 수입 확보\n• 던전 탐험으로 아이템 획득',
-                                    inline: false
-                                }
-                            )
-                            .setFooter({ text: '새로운 모험을 즐겨보세요! 🚀' });
-
-                        await personalChannel.send({ embeds: [channelEmbed] });
-                    }
-                } catch (error) {
-                    console.error('개인 채널 안내 메시지 전송 오류:', error);
-                }
+                // 개인 채널은 이미 삭제되었으므로 안내 메시지 전송하지 않음
 
                 console.log(`플레이어 ${userId}의 데이터가 초기화되었습니다.`);
             } catch (error) {
@@ -320,7 +294,21 @@ module.exports = {
         });
     },
 
-    async performDataReset(db, userId) {
+    async performDataReset(db, userId, interaction) {
+        // 기존 개인 채널 삭제
+        try {
+            const PersonalChannelSystem = require('../systems/PersonalChannelSystem');
+            const personalChannelSystem = new PersonalChannelSystem(interaction.client);
+            const existingChannel = await personalChannelSystem.findPersonalChannel(interaction.guild.id, userId);
+            
+            if (existingChannel) {
+                await existingChannel.delete('프로필 초기화로 인한 개인 채널 삭제');
+                console.log(`기존 개인 채널 삭제됨: ${existingChannel.name} (${userId})`);
+            }
+        } catch (error) {
+            console.error('개인 채널 삭제 오류:', error);
+        }
+
         // 모든 플레이어 관련 데이터 삭제
         const tablesToReset = [
             'player_achievements',
