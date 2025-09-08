@@ -282,6 +282,21 @@ CREATE TABLE IF NOT EXISTS player_achievements (
     FOREIGN KEY (achievement_id) REFERENCES achievements(id)
 );
 
+-- 아이템
+CREATE TABLE IF NOT EXISTS items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    category TEXT NOT NULL,
+    price INTEGER NOT NULL,
+    description TEXT NOT NULL,
+    effect_type TEXT NOT NULL,
+    effect_value INTEGER NOT NULL,
+    effect_duration INTEGER DEFAULT 0,
+    rarity TEXT NOT NULL,
+    stock INTEGER DEFAULT -1,
+    is_available BOOLEAN DEFAULT TRUE
+);
+
 -- 상점 아이템
 CREATE TABLE IF NOT EXISTS shop_items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

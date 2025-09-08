@@ -50,11 +50,11 @@ class Database {
                 const dbPath = path.join(__dirname, filename);
                 
                 this.client = new sqlite3.Database(dbPath, (err) => {
-                    if (err) {
-                        console.error('데이터베이스 연결 오류:', err);
+                if (err) {
+                    console.error('데이터베이스 연결 오류:', err);
                         throw err;
-                    } else {
-                        console.log('SQLite 데이터베이스에 연결되었습니다.');
+                } else {
+                    console.log('SQLite 데이터베이스에 연결되었습니다.');
                     }
                 });
                 await this.createTables();
@@ -102,17 +102,17 @@ class Database {
             }
         } else {
             // SQLite
-            return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
                 this.client.exec(schema, (err) => {
-                    if (err) {
+                if (err) {
                         console.error('SQLite 테이블 생성 오류:', err);
-                        reject(err);
-                    } else {
+                    reject(err);
+                } else {
                         console.log('SQLite 테이블이 생성되었습니다.');
-                        this.seedInitialData().then(resolve).catch(reject);
-                    }
-                });
+                    this.seedInitialData().then(resolve).catch(reject);
+                }
             });
+        });
         }
     }
 
@@ -567,7 +567,7 @@ class Database {
             // jobs는 WorkSystem에서 관리하므로 제외
             await this.insertMultiple('stocks', stocks);
             // pet_types는 별도 시스템에서 관리하므로 제외
-            await this.insertMultiple('items', items);
+            // items는 별도 시스템에서 관리하므로 제외
             await this.insertMultiple('achievements', achievements);
             await this.insertMultiple('titles', titles);
             console.log('초기 데이터가 삽입되었습니다.');
@@ -597,20 +597,20 @@ class Database {
             }
         } else {
             // SQLite
-            const placeholders = columns.map(() => '?').join(', ');
-            const sql = `INSERT OR IGNORE INTO ${table} (${columns.join(', ')}) VALUES (${placeholders})`;
-            
-            return new Promise((resolve, reject) => {
+        const placeholders = columns.map(() => '?').join(', ');
+        const sql = `INSERT OR IGNORE INTO ${table} (${columns.join(', ')}) VALUES (${placeholders})`;
+        
+        return new Promise((resolve, reject) => {
                 const stmt = this.client.prepare(sql);
-                data.forEach(row => {
-                    const values = columns.map(col => row[col]);
-                    stmt.run(values);
-                });
-                stmt.finalize((err) => {
-                    if (err) reject(err);
-                    else resolve();
-                });
+            data.forEach(row => {
+                const values = columns.map(col => row[col]);
+                stmt.run(values);
             });
+            stmt.finalize((err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
         }
     }
 
@@ -626,12 +626,12 @@ class Database {
             }
         } else {
             // SQLite
-            return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
                 this.client.get(sql, params, (err, row) => {
-                    if (err) reject(err);
-                    else resolve(row);
-                });
+                if (err) reject(err);
+                else resolve(row);
             });
+        });
         }
     }
 
@@ -647,12 +647,12 @@ class Database {
             }
         } else {
             // SQLite
-            return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
                 this.client.all(sql, params, (err, rows) => {
-                    if (err) reject(err);
-                    else resolve(rows);
-                });
+                if (err) reject(err);
+                else resolve(rows);
             });
+        });
         }
     }
 
@@ -668,12 +668,12 @@ class Database {
             }
         } else {
             // SQLite
-            return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
                 this.client.run(sql, params, function(err) {
-                    if (err) reject(err);
-                    else resolve({ id: this.lastID, changes: this.changes });
-                });
+                if (err) reject(err);
+                else resolve({ id: this.lastID, changes: this.changes });
             });
+        });
         }
     }
 
@@ -689,12 +689,12 @@ class Database {
             } else {
                 // SQLite
                 this.client.close((err) => {
-                    if (err) {
+                if (err) {
                         console.error('SQLite 연결 종료 오류:', err);
-                    } else {
+                } else {
                         console.log('SQLite 연결이 종료되었습니다.');
-                    }
-                });
+                }
+            });
             }
         }
     }
