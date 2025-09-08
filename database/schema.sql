@@ -1,4 +1,4 @@
--- 플레이어 기본 정보
+ 요-- 플레이어 기본 정보
 CREATE TABLE IF NOT EXISTS players (
     id TEXT PRIMARY KEY,
     username TEXT NOT NULL,
@@ -10,9 +10,11 @@ CREATE TABLE IF NOT EXISTS players (
     last_active DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- 플레이어 스탯
+-- 플레이어 스탯 (직업/일상용)
 CREATE TABLE IF NOT EXISTS player_stats (
     player_id TEXT PRIMARY KEY,
+    level INTEGER DEFAULT 1,
+    experience INTEGER DEFAULT 0,
     health INTEGER DEFAULT 100,
     happiness INTEGER DEFAULT 50,
     education INTEGER DEFAULT 0,
@@ -21,6 +23,25 @@ CREATE TABLE IF NOT EXISTS player_stats (
     intelligence INTEGER DEFAULT 50,
     strength INTEGER DEFAULT 50,
     agility INTEGER DEFAULT 50,
+    FOREIGN KEY (player_id) REFERENCES players(id)
+);
+
+-- 플레이어 RPG 스탯 (던전/전투용)
+CREATE TABLE IF NOT EXISTS player_rpg_stats (
+    player_id TEXT PRIMARY KEY,
+    rpg_level INTEGER DEFAULT 1,
+    rpg_experience INTEGER DEFAULT 0,
+    hp INTEGER DEFAULT 100,
+    max_hp INTEGER DEFAULT 100,
+    mp INTEGER DEFAULT 50,
+    max_mp INTEGER DEFAULT 50,
+    attack INTEGER DEFAULT 10,
+    defense INTEGER DEFAULT 5,
+    magic_attack INTEGER DEFAULT 8,
+    magic_defense INTEGER DEFAULT 3,
+    speed INTEGER DEFAULT 10,
+    critical_rate REAL DEFAULT 0.05,
+    critical_damage REAL DEFAULT 1.5,
     FOREIGN KEY (player_id) REFERENCES players(id)
 );
 

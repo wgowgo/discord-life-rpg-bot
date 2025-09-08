@@ -277,10 +277,43 @@ class PaginationSystem {
     // 던전 포맷터
     formatDungeon(dungeon) {
         const difficultyEmoji = this.getDifficultyEmoji(dungeon.difficulty);
+        const requirements = [];
+        
+        // 레벨 요구사항
+        if (dungeon.required_level > 1) {
+            requirements.push(`📚 레벨: ${dungeon.required_level} 이상`);
+        }
+        
+        // 스탯 요구사항 (JSON 파싱)
+        if (dungeon.required_stats) {
+            try {
+                const stats = JSON.parse(dungeon.required_stats);
+                for (const [stat, value] of Object.entries(stats)) {
+                    const statNames = {
+                        'intelligence': '지능',
+                        'charm': '매력',
+                        'strength': '근력',
+                        'agility': '민첩성',
+                        'luck': '행운',
+                        'hp': '체력',
+                        'mp': '마나',
+                        'attack': '공격력',
+                        'defense': '방어력'
+                    };
+                    requirements.push(`⚔️ ${statNames[stat] || stat}: ${value} 이상`);
+                }
+            } catch (e) {
+                // JSON 파싱 실패 시 무시
+            }
+        }
+        
+        const reqText = requirements.length > 0 ? requirements.join('\n') : '요구사항 없음';
+        
         return [
-            `${difficultyEmoji} **${dungeon.name}**`,
-            `📊 난이도: ${dungeon.difficulty}/5`,
-            `📚 필요 레벨: ${dungeon.required_level}`,
+            `**ID: ${dungeon.id} | ${dungeon.name}**`,
+            `${difficultyEmoji} 난이도: ${dungeon.difficulty}/5`,
+            `📋 입장 요구사항:`,
+            reqText,
             `📝 ${dungeon.description}`
         ].join('\n');
     }

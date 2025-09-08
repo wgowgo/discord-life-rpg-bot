@@ -167,7 +167,7 @@ class Player {
                 VALUES (?, ?, ?, 1, 0, 20, CURRENT_TIMESTAMP)
             `, [userId, username, startingMoney]);
 
-            // 스탯 생성
+            // 일상 스탯 생성
             await this.db.run(`
                 INSERT INTO player_stats (
                     player_id, health, happiness, education, charm, luck, 
@@ -185,6 +185,16 @@ class Player {
                 startingStats.strength,
                 startingStats.agility
             ]);
+
+            // RPG 스탯 생성
+            await this.db.run(`
+                INSERT INTO player_rpg_stats (
+                    player_id, rpg_level, rpg_experience, hp, max_hp, mp, max_mp,
+                    attack, defense, magic_attack, magic_defense, speed,
+                    critical_rate, critical_damage
+                )
+                VALUES (?, 1, 0, 100, 100, 50, 50, 10, 5, 8, 3, 10, 0.05, 1.5)
+            `, [userId]);
 
             console.log(`새 플레이어 생성: ${username} (${userId})`);
             return true;

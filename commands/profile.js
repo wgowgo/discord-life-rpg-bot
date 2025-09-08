@@ -60,18 +60,18 @@ module.exports = {
             
             // 이미 등록된 플레이어인 경우
             if (existingPlayer) {
-                const profileData = await player.getProfile(
-                    targetUser.id, 
-                    targetUser.displayName || targetUser.username,
-                    false // 새 플레이어 생성하지 않음
-                );
+                const embed = new (require('discord.js').EmbedBuilder)()
+                    .setColor(0xff6b6b) // 빨간색
+                    .setTitle('❌ 이미 회원가입된 계정')
+                    .setDescription(`${targetUser.displayName || targetUser.username}님은 이미 회원가입된 계정입니다.`)
+                    .addFields({
+                        name: '💡 도움말',
+                        value: '프로필을 확인하려면 `/프로필` 명령어를 사용하세요.',
+                        inline: false
+                    })
+                    .setTimestamp();
                 
-                const embed = await player.createProfileEmbed(profileData);
-                embed.setTitle('👤 프로필 정보');
-                embed.setDescription('이미 회원가입된 계정입니다.');
-                embed.setColor(0x5865F2); // Discord 블루
-                
-                await interaction.reply({ embeds: [embed] });
+                await interaction.reply({ embeds: [embed], ephemeral: true });
                 return;
             }
 

@@ -15,7 +15,7 @@ class DungeonSystem {
                 type: 'daily',
                 difficulty: 1,
                 required_level: 1,
-                required_stats: JSON.stringify({ intelligence: 30 }),
+                required_stats: JSON.stringify({ attack: 15, defense: 10 }),
                 rewards: JSON.stringify({ money: 50000, experience: 100, items: [1, 2] }),
                 description: '회사에서 벌어지는 업무 전투!'
             },
@@ -24,7 +24,7 @@ class DungeonSystem {
                 type: 'daily',
                 difficulty: 2,
                 required_level: 3,
-                required_stats: JSON.stringify({ strength: 40 }),
+                required_stats: JSON.stringify({ attack: 25, hp: 80 }),
                 rewards: JSON.stringify({ experience: 150, stats: { strength: 5, health: 10 } }),
                 description: '근육을 키우는 고된 훈련!'
             },
@@ -33,7 +33,7 @@ class DungeonSystem {
                 type: 'daily',
                 difficulty: 1,
                 required_level: 1,
-                required_stats: JSON.stringify({ intelligence: 25 }),
+                required_stats: JSON.stringify({ magic_attack: 20, mp: 60 }),
                 rewards: JSON.stringify({ experience: 80, stats: { intelligence: 8, education: 3 } }),
                 description: '지식의 바다에서 펼쳐지는 학습 전투!'
             },
@@ -42,7 +42,7 @@ class DungeonSystem {
                 type: 'daily',
                 difficulty: 2,
                 required_level: 2,
-                required_stats: JSON.stringify({ charm: 35, intelligence: 30 }),
+                required_stats: JSON.stringify({ attack: 20, magic_attack: 15, speed: 12 }),
                 rewards: JSON.stringify({ experience: 120, stats: { charm: 8, health: 5 } }),
                 description: '뜨거운 주방에서 펼쳐지는 요리 배틀!'
             },
@@ -233,27 +233,37 @@ class DungeonSystem {
 
             // 플레이어 정보 확인
             const player = await this.db.get('SELECT * FROM players WHERE id = ?', [playerId]);
-            const stats = await this.db.get('SELECT * FROM player_stats WHERE player_id = ?', [playerId]);
+            const rpgStats = await this.db.get('SELECT * FROM player_rpg_stats WHERE player_id = ?', [playerId]);
             
-            if (!player || !stats) {
+            if (!player || !rpgStats) {
                 return { success: false, message: '플레이어 정보를 찾을 수 없습니다.' };
             }
 
-            // 레벨 체크
-            if (player.level < dungeon.required_level) {
+            // RPG 레벨 체크
+            if (rpgStats.rpg_level < dungeon.required_level) {
                 return { 
                     success: false, 
-                    message: `레벨이 부족합니다. 필요 레벨: ${dungeon.required_level}` 
+                    message: `RPG 레벨이 부족합니다. 필요 레벨: ${dungeon.required_level}`
                 };
             }
 
-            // 스탯 체크
+            // RPG 스탯 체크
             const requiredStats = JSON.parse(dungeon.required_stats);
             for (const [stat, required] of Object.entries(requiredStats)) {
-                if (stats[stat] < required) {
+                if (rpgStats[stat] < required) {
+                    const statNames = {
+                        'hp': '체력',
+                        'mp': '마나',
+                        'attack': '공격력',
+                        'defense': '방어력',
+                        'magic_attack': '마법 공격력',
+                        'magic_defense': '마법 방어력',
+                        'speed': '속도'
+                    };
+                    const statName = statNames[stat] || stat;
                     return { 
                         success: false, 
-                        message: `${stat} 스탯이 부족합니다. (필요: ${required}, 보유: ${stats[stat]})` 
+                        message: `${statName}이 부족합니다. (필요: ${required}, 보유: ${rpgStats[stat]})` 
                     };
                 }
             }
