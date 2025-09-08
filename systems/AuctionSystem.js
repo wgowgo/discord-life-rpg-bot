@@ -122,7 +122,7 @@ class AuctionSystem {
             )
         `);
 
-        console.log('경매 시스템 초기화 완료');
+        // console.log('경매 시스템 초기화 완료');
     }
 
     async createAuction(sellerId, itemId, quantity, startingPrice, buyoutPrice = null, auctionType = 'standard', title = '', description = '') {

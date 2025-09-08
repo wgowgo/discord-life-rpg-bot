@@ -94,7 +94,7 @@ class LifeRPGBot {
             await this.gamblingSystem.initializeGamblingSystem();
             await this.achievementSystem.initializeAchievementSystem();
             await this.shopSystem.initializeShopSystem();
-            console.log('모든 게임 시스템이 초기화되었습니다.');
+            // console.log('모든 게임 시스템이 초기화되었습니다.');
         } catch (error) {
             console.error('시스템 초기화 오류:', error);
         }
@@ -114,7 +114,7 @@ class LifeRPGBot {
                 const command = require(filePath);
                 if ('data' in command && 'execute' in command) {
                     this.commands.set(command.data.name, command);
-                    console.log(`명령어 로드됨: ${command.data.name}`);
+                    // console.log(`명령어 로드됨: ${command.data.name}`);
                 }
             } catch (error) {
                 console.error(`명령어 로드 오류 (${file}):`, error);
@@ -131,14 +131,14 @@ class LifeRPGBot {
             
             const commands = Array.from(this.commands.values()).map(command => command.data.toJSON());
             
-            console.log(`${commands.length}개의 슬래시 명령어를 등록하는 중...`);
+            // console.log(`${commands.length}개의 슬래시 명령어를 등록하는 중...`);
             
             await rest.put(
                 Routes.applicationGuildCommands(config.clientId, config.guildId),
                 { body: commands }
             );
             
-            console.log('슬래시 명령어 등록이 완료되었습니다!');
+            // console.log('슬래시 명령어 등록이 완료되었습니다!');
         } catch (error) {
             console.error('명령어 등록 중 오류 발생:', error);
         }

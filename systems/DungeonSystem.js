@@ -206,7 +206,7 @@ class DungeonSystem {
                 dungeon.required_stats, dungeon.rewards, dungeon.description]);
         }
 
-        console.log('던전 데이터 초기화 완료');
+        // console.log('던전 데이터 초기화 완료');
     }
 
     async getDungeonList(type = null) {

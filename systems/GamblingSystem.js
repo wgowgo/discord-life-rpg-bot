@@ -19,7 +19,7 @@ class GamblingSystem {
             )
         `);
 
-        console.log('도박 시스템 초기화 완료');
+        // console.log('도박 시스템 초기화 완료');
     }
 
     // 동전 던지기 (50% 확률)

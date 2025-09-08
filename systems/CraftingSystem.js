@@ -360,7 +360,7 @@ class CraftingSystem {
             )
         `);
 
-        console.log('제작 시스템 초기화 완료');
+        // console.log('제작 시스템 초기화 완료');
     }
 
     async seedCraftingData() {

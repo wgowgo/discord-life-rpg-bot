@@ -232,7 +232,7 @@ class BusinessSystem {
                 business.monthly_cost, business.required_staff, business.description]);
         }
 
-        console.log('사업 시스템 초기화 완료');
+        // console.log('사업 시스템 초기화 완료');
     }
 
     async startBusiness(playerId, businessTypeId, businessName) {

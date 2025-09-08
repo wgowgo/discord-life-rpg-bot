@@ -408,7 +408,7 @@ class EducationSystem {
                 course.required_education, course.education_gain, course.stats_bonus, course.description]);
         }
 
-        console.log('교육 시스템 초기화 완료');
+        // console.log('교육 시스템 초기화 완료');
     }
 
     async enrollCourse(playerId, courseId) {

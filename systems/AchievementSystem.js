@@ -150,7 +150,7 @@ class AchievementSystem {
             ]);
         }
 
-        console.log('업적 시스템 초기화 완료');
+        // console.log('업적 시스템 초기화 완료');
     }
 
     async checkAchievements(playerId, type, value = 1) {

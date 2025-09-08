@@ -226,7 +226,7 @@ class WorkSystem {
             `, [job.name, job.category, job.base_salary, job.required_education, job.required_stats, job.description]);
         }
 
-        console.log('직업 데이터 초기화 완료');
+        // console.log('직업 데이터 초기화 완료');
     }
 
     async getJobList() {
