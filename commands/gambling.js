@@ -68,10 +68,10 @@ module.exports = {
                 .setName('순위')
                 .setDescription('도박 순위를 확인합니다')),
 
-    async execute(interaction, db, personalChannelSystem) {
+    async execute(interaction, client) {
         const subcommand = interaction.options.getSubcommand();
         const userId = interaction.user.id;
-        const gamblingSystem = new GamblingSystem(db);
+        const gamblingSystem = client.gamblingSystem;
 
         try {
             switch (subcommand) {

@@ -26,23 +26,23 @@ module.exports = {
                 .setName('급여')
                 .setDescription('이번 주 급여를 받습니다 (일주일에 한번)')),
 
-    async execute(interaction, db) {
+    async execute(interaction, client) {
         const subcommand = interaction.options.getSubcommand();
         const userId = interaction.user.id;
 
         try {
             switch (subcommand) {
                 case '목록':
-                    await this.handleJobList(interaction, db);
+                    await this.handleJobList(interaction, client);
                     break;
                 case '지원':
-                    await this.handleApply(interaction, db, userId);
+                    await this.handleApply(interaction, client, userId);
                     break;
                 case '퇴사':
-                    await this.handleQuit(interaction, db, userId);
+                    await this.handleQuit(interaction, client, userId);
                     break;
                 case '급여':
-                    await this.handleSalary(interaction, db, userId);
+                    await this.handleSalary(interaction, client, userId);
                     break;
             }
         } catch (error) {
@@ -54,7 +54,7 @@ module.exports = {
         }
     },
 
-    async handleJobList(interaction, db) {
+    async handleJobList(interaction, client) {
         const jobs = await db.all(`
             SELECT * FROM jobs ORDER BY required_education ASC, base_salary DESC
         `);
@@ -69,7 +69,7 @@ module.exports = {
             return;
         }
 
-        const paginationSystem = new PaginationSystem();
+        const paginationSystem = client.paginationSystem;
         const categoryEmojis = {
             '서비스': '🏪',
             'IT': '💻',
@@ -147,7 +147,7 @@ module.exports = {
         await interaction.reply(response);
     },
 
-    async handleApply(interaction, db, userId) {
+    async handleApply(interaction, client, userId) {
         const jobId = interaction.options.getInteger('직업id');
 
         // 플레이어 정보 확인
@@ -334,7 +334,7 @@ module.exports = {
         await interaction.reply({ embeds: [embed] });
     },
 
-    async handleQuit(interaction, db, userId) {
+    async handleQuit(interaction, client, userId) {
         // 현재 직업 확인
         const currentJob = await db.get(`
             SELECT pj.*, j.name as job_name 
@@ -394,7 +394,7 @@ module.exports = {
         await interaction.reply({ embeds: [embed] });
     },
 
-    async handleSalary(interaction, db, userId) {
+    async handleSalary(interaction, client, userId) {
         // 현재 직업 확인
         const currentJob = await db.get(`
             SELECT pj.*, j.name as job_name 

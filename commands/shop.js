@@ -47,14 +47,14 @@ module.exports = {
                         .setDescription('사용할 아이템 ID')
                         .setRequired(true))),
 
-    async execute(interaction, db) {
+    async execute(interaction, client) {
         const subcommand = interaction.options.getSubcommand();
         const userId = interaction.user.id;
 
         try {
             // 목록 명령어는 누구나 사용 가능
             if (subcommand === '목록') {
-                await this.handleShopList(interaction, db);
+                await this.handleShopList(interaction, client);
                 return;
             }
 
@@ -78,13 +78,13 @@ module.exports = {
 
             switch (subcommand) {
                 case '구매':
-                    await this.handleBuy(interaction, db, userId);
+                    await this.handleBuy(interaction, client, userId);
                     break;
                 case '인벤토리':
-                    await this.handleInventory(interaction, db, userId);
+                    await this.handleInventory(interaction, client, userId);
                     break;
                 case '사용':
-                    await this.handleUse(interaction, db, userId);
+                    await this.handleUse(interaction, client, userId);
                     break;
             }
         } catch (error) {
@@ -96,7 +96,7 @@ module.exports = {
         }
     },
 
-    async handleShopList(interaction, db) {
+    async handleShopList(interaction, client) {
         const category = interaction.options.getString('카테고리');
         
         let sql = 'SELECT * FROM items WHERE price > 0';
@@ -121,7 +121,7 @@ module.exports = {
             return;
         }
 
-        const paginationSystem = new PaginationSystem();
+        const paginationSystem = client.paginationSystem;
         const categoryEmojis = {
             'consumable': '🧪',
             'accessory': '💎',
@@ -186,7 +186,7 @@ module.exports = {
         await interaction.reply(response);
     },
 
-    async handleBuy(interaction, db, userId) {
+    async handleBuy(interaction, client, userId) {
         const itemId = interaction.options.getInteger('아이템id');
         const quantity = interaction.options.getInteger('수량') || 1;
 
@@ -253,7 +253,7 @@ module.exports = {
         await interaction.reply({ embeds: [embed] });
     },
 
-    async handleInventory(interaction, db, userId) {
+    async handleInventory(interaction, client, userId) {
         const playerManager = new Player(db);
         const inventory = await playerManager.getInventory(userId);
 
@@ -308,7 +308,7 @@ module.exports = {
         await interaction.reply({ embeds: [embed] });
     },
 
-    async handleUse(interaction, db, userId) {
+    async handleUse(interaction, client, userId) {
         const itemId = interaction.options.getInteger('아이템id');
 
         const playerManager = new Player(db);

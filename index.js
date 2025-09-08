@@ -24,6 +24,11 @@ const PropertySystem = require('./systems/PropertySystem');
 const MinigameSystem = require('./systems/MinigameSystem');
 const PersonalChannelSystem = require('./systems/PersonalChannelSystem');
 const WorkSystem = require('./systems/WorkSystem');
+const MiningSystem = require('./systems/MiningSystem');
+const GamblingSystem = require('./systems/GamblingSystem');
+const AchievementSystem = require('./systems/AchievementSystem');
+const ShopSystem = require('./systems/ShopSystem');
+const PaginationSystem = require('./systems/PaginationSystem');
 const cron = require('node-cron');
 
 class LifeRPGBot {
@@ -49,6 +54,11 @@ class LifeRPGBot {
         this.propertySystem = new PropertySystem(this.db);
         this.minigameSystem = new MinigameSystem(this.db);
         this.workSystem = new WorkSystem(this.db);
+        this.miningSystem = new MiningSystem(this.db);
+        this.gamblingSystem = new GamblingSystem(this.db);
+        this.achievementSystem = new AchievementSystem(this.db);
+        this.shopSystem = new ShopSystem(this.db);
+        this.paginationSystem = new PaginationSystem(this.db);
         this.personalChannelSystem = null; // 클라이언트 준비 후 초기화
         
         this.init();
@@ -80,6 +90,10 @@ class LifeRPGBot {
             await this.educationSystem.initializeEducationSystem();
             await this.propertySystem.initializePropertySystem();
             await this.workSystem.initializeJobs();
+            await this.miningSystem.initializeMiningSystem();
+            await this.gamblingSystem.initializeGamblingSystem();
+            await this.achievementSystem.initializeAchievementSystem();
+            await this.shopSystem.initializeShopSystem();
             console.log('모든 게임 시스템이 초기화되었습니다.');
         } catch (error) {
             console.error('시스템 초기화 오류:', error);
@@ -161,7 +175,7 @@ class LifeRPGBot {
                 }
 
                 try {
-                    await command.execute(interaction, this.db, this.personalChannelSystem);
+                    await command.execute(interaction, this);
                 } catch (error) {
                     console.error('명령어 실행 오류:', error);
                     const errorMessage = '명령어 실행 중 오류가 발생했습니다.';

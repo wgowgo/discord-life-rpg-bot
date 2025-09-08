@@ -40,8 +40,8 @@ module.exports = {
                 .setName('기록')
                 .setDescription('내 던전 클리어 기록을 확인합니다')),
 
-    async execute(interaction, db) {
-        const dungeonSystem = new DungeonSystem(db);
+    async execute(interaction, client) {
+        const dungeonSystem = client.dungeonSystem;
         const subcommand = interaction.options.getSubcommand();
         const userId = interaction.user.id;
 
@@ -79,7 +79,7 @@ module.exports = {
             return;
         }
 
-        const paginationSystem = new PaginationSystem();
+        const paginationSystem = client.paginationSystem;
         const typeEmojis = {
             'daily': '📅',
             'adventure': '⚔️',

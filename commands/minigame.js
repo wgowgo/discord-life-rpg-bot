@@ -57,8 +57,8 @@ module.exports = {
                 .setName('통계')
                 .setDescription('내 미니게임 통계를 확인합니다 (회원가입 필요)')),
 
-    async execute(interaction, db) {
-        const minigameSystem = new MinigameSystem(db);
+    async execute(interaction, client) {
+        const minigameSystem = client.minigameSystem;
         const subcommand = interaction.options.getSubcommand();
         const userId = interaction.user.id;
 

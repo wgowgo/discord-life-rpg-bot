@@ -41,8 +41,8 @@ module.exports = {
                 .setName('인벤토리')
                 .setDescription('채굴한 아이템 인벤토리를 확인합니다 (회원가입 필요)')),
 
-    async execute(interaction, db) {
-        const miningSystem = new MiningSystem(db);
+    async execute(interaction, client) {
+        const miningSystem = client.miningSystem;
         const subcommand = interaction.options.getSubcommand();
         const userId = interaction.user.id;
 

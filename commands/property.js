@@ -46,8 +46,8 @@ module.exports = {
                 .setName('랭킹')
                 .setDescription('부동산 보유 랭킹을 확인합니다')),
 
-    async execute(interaction, db) {
-        const propertySystem = new PropertySystem(db);
+    async execute(interaction, client) {
+        const propertySystem = client.propertySystem;
         const subcommand = interaction.options.getSubcommand();
         const userId = interaction.user.id;
 

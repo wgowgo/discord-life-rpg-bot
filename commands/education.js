@@ -38,8 +38,8 @@ module.exports = {
                 .setName('랭킹')
                 .setDescription('교육 수준 랭킹을 확인합니다')),
 
-    async execute(interaction, db) {
-        const educationSystem = new EducationSystem(db);
+    async execute(interaction, client) {
+        const educationSystem = client.educationSystem;
         const subcommand = interaction.options.getSubcommand();
         const userId = interaction.user.id;
 

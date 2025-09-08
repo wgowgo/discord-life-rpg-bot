@@ -62,8 +62,8 @@ module.exports = {
                 .setName('결혼랭킹')
                 .setDescription('결혼 기간 랭킹을 확인합니다')),
 
-    async execute(interaction, db) {
-        const romanceSystem = new RomanceSystem(db);
+    async execute(interaction, client) {
+        const romanceSystem = client.romanceSystem;
         const subcommand = interaction.options.getSubcommand();
         const userId = interaction.user.id;
 

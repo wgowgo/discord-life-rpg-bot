@@ -22,21 +22,21 @@ module.exports = {
                 .setName('초기화')
                 .setDescription('내 프로필 데이터를 초기화합니다')),
 
-    async execute(interaction, db, personalChannelSystem) {
+    async execute(interaction, client) {
         const subcommand = interaction.options.getSubcommand();
         const userId = interaction.user.id;
-        const player = new Player(db);
+        const player = client.player;
 
         try {
             switch (subcommand) {
                 case '회원가입':
-                    await this.handleRegisterProfile(interaction, db, personalChannelSystem);
+                    await this.handleRegisterProfile(interaction, client);
                     break;
                 case '확인':
-                    await this.handleViewProfile(interaction, db, personalChannelSystem);
+                    await this.handleViewProfile(interaction, client);
                     break;
                 case '초기화':
-                    await this.handleResetProfile(interaction, db, userId);
+                    await this.handleResetProfile(interaction, client, userId);
                     break;
             }
         } catch (error) {
@@ -48,9 +48,9 @@ module.exports = {
         }
     },
 
-    async handleRegisterProfile(interaction, db, personalChannelSystem) {
+    async handleRegisterProfile(interaction, client) {
         const targetUser = interaction.user;
-        const player = new Player(db);
+        const player = client.player;
 
         try {
             // 먼저 기존 플레이어가 있는지 직접 확인
@@ -129,9 +129,9 @@ module.exports = {
             await interaction.reply({ embeds: [embed] });
 
             // 새 플레이어인 경우 개인 채널 생성
-            if (isNewPlayer && personalChannelSystem) {
+            if (isNewPlayer && client.personalChannelSystem) {
                 try {
-                    const personalChannel = await personalChannelSystem.createPersonalChannel(
+                    const personalChannel = await client.personalChannelSystem.createPersonalChannel(
                         interaction.guildId,
                         targetUser.id,
                         targetUser.displayName || targetUser.username
@@ -180,9 +180,9 @@ module.exports = {
         }
     },
 
-    async handleViewProfile(interaction, db, personalChannelSystem) {
+    async handleViewProfile(interaction, client) {
         const targetUser = interaction.options.getUser('유저') || interaction.user;
-        const player = new Player(db);
+        const player = client.player;
 
         try {
             // 프로필 데이터 가져오기 (기존 플레이어만)
@@ -224,7 +224,7 @@ module.exports = {
         }
     },
 
-    async handleResetProfile(interaction, db, userId) {
+    async handleResetProfile(interaction, client, userId) {
         // 1단계: 확인 메시지
         const confirmEmbed = new EmbedBuilder()
             .setColor(0xFF6B6B)
@@ -386,8 +386,7 @@ module.exports = {
         // 기존 개인 채널 삭제
         try {
             const PersonalChannelSystem = require('../systems/PersonalChannelSystem');
-            const personalChannelSystem = new PersonalChannelSystem(interaction.client);
-            const existingChannel = await personalChannelSystem.findPersonalChannel(interaction.guild.id, userId);
+            const existingChannel = await client.personalChannelSystem.findPersonalChannel(interaction.guild.id, userId);
             
             if (existingChannel) {
                 await existingChannel.delete('프로필 초기화로 인한 개인 채널 삭제');

@@ -65,8 +65,8 @@ module.exports = {
                 .setName('랭킹')
                 .setDescription('사업 수익 랭킹을 확인합니다')),
 
-    async execute(interaction, db) {
-        const businessSystem = new BusinessSystem(db);
+    async execute(interaction, client) {
+        const businessSystem = client.businessSystem;
         const subcommand = interaction.options.getSubcommand();
         const userId = interaction.user.id;
 

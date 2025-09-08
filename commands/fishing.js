@@ -31,8 +31,8 @@ module.exports = {
                             { name: '강철 낚시대 (50,000원)', value: 'steel_rod' }
                         ))),
 
-    async execute(interaction, db) {
-        const fishingSystem = new FishingSystem(db);
+    async execute(interaction, client) {
+        const fishingSystem = client.fishingSystem;
         const subcommand = interaction.options.getSubcommand();
         const userId = interaction.user.id;
 

@@ -48,8 +48,8 @@ module.exports = {
                 .setName('상점')
                 .setDescription('씨앗 상점을 확인합니다 (누구나 사용 가능)')),
 
-    async execute(interaction, db) {
-        const farmingSystem = new FarmingSystem(db);
+    async execute(interaction, client) {
+        const farmingSystem = client.farmingSystem;
         const subcommand = interaction.options.getSubcommand();
         const userId = interaction.user.id;
 

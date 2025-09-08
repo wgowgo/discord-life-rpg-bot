@@ -34,23 +34,23 @@ module.exports = {
                 .setName('도전과제')
                 .setDescription('현재 진행 중인 도전과제를 확인합니다')),
 
-    async execute(interaction, db) {
+    async execute(interaction, client) {
         const subcommand = interaction.options.getSubcommand();
         const userId = interaction.user.id;
 
         try {
             switch (subcommand) {
                 case '목록':
-                    await this.handleMyAchievements(interaction, db, userId);
+                    await this.handleMyAchievements(interaction, client, userId);
                     break;
                 case '전체':
-                    await this.handleAllAchievements(interaction, db, userId);
+                    await this.handleAllAchievements(interaction, client, userId);
                     break;
                 case '칭호':
-                    await this.handleTitles(interaction, db, userId);
+                    await this.handleTitles(interaction, client, userId);
                     break;
                 case '도전과제':
-                    await this.handleChallenges(interaction, db, userId);
+                    await this.handleChallenges(interaction, client, userId);
                     break;
             }
         } catch (error) {
@@ -62,7 +62,7 @@ module.exports = {
         }
     },
 
-    async handleMyAchievements(interaction, db, userId) {
+    async handleMyAchievements(interaction, client, userId) {
         const achievements = await db.all(`
             SELECT 
                 a.*,
@@ -122,7 +122,7 @@ module.exports = {
         await interaction.reply({ embeds: [embed] });
     },
 
-    async handleAllAchievements(interaction, db, userId) {
+    async handleAllAchievements(interaction, client, userId) {
         const allAchievements = await db.all(`
             SELECT 
                 a.*,
@@ -142,7 +142,7 @@ module.exports = {
             return;
         }
 
-        const paginationSystem = new PaginationSystem();
+        const paginationSystem = client.paginationSystem;
         
         // 달성/미달성 통계
         const unlockedCount = allAchievements.filter(a => a.unlocked).length;
@@ -218,7 +218,7 @@ module.exports = {
         await interaction.reply(response);
     },
 
-    async handleTitles(interaction, db, userId) {
+    async handleTitles(interaction, client, userId) {
         const action = interaction.options.getString('액션');
         const titleId = interaction.options.getInteger('칭호id');
 
@@ -303,7 +303,7 @@ module.exports = {
         }
     },
 
-    async handleChallenges(interaction, db, userId) {
+    async handleChallenges(interaction, client, userId) {
         const challenges = await db.all(`
             SELECT 
                 c.*,
