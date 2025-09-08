@@ -329,36 +329,47 @@ module.exports = {
             console.error('개인 채널 삭제 오류:', error);
         }
 
-        // 모든 플레이어 관련 데이터 삭제
+        // 모든 플레이어 관련 데이터 삭제 (테이블별 올바른 컬럼명 사용)
         const tablesToReset = [
-            'player_achievements',
-            'player_titles', 
-            'player_inventory',
-            'player_pets',
-            'player_properties',
-            'player_stocks',
-            'player_jobs',
-            'player_dungeon_clears',
-            'player_challenges',
-            'player_businesses',
-            'player_education',
-            'player_romance',
-            'player_farming',
-            'chat_activity',
-            'voice_activity',
-            'transactions',
-            'friendships',
-            'marriages',
-            'player_stats',
-            'players'
+            { table: 'player_achievements', column: 'player_id' },
+            { table: 'player_titles', column: 'player_id' },
+            { table: 'player_inventory', column: 'player_id' },
+            { table: 'player_pets', column: 'player_id' },
+            { table: 'player_properties', column: 'player_id' },
+            { table: 'player_stocks', column: 'player_id' },
+            { table: 'player_jobs', column: 'player_id' },
+            { table: 'player_dungeon_clears', column: 'player_id' },
+            { table: 'player_challenges', column: 'player_id' },
+            { table: 'player_businesses', column: 'player_id' },
+            { table: 'player_education', column: 'player_id' },
+            { table: 'player_romance', column: 'player_id' },
+            { table: 'player_farming', column: 'player_id' },
+            { table: 'chat_activity', column: 'user_id' },
+            { table: 'voice_activity', column: 'user_id' },
+            { table: 'transactions', column: 'user_id' },
+            { table: 'player_stats', column: 'player_id' },
+            { table: 'players', column: 'id' }
         ];
 
-        for (const table of tablesToReset) {
+        for (const { table, column } of tablesToReset) {
             try {
-                await db.run(`DELETE FROM ${table} WHERE player_id = ?`, [userId]);
+                await db.run(`DELETE FROM ${table} WHERE ${column} = ?`, [userId]);
             } catch (error) {
                 console.error(`${table} 테이블 초기화 오류:`, error);
             }
+        }
+
+        // friendships와 marriages 테이블은 두 컬럼 모두 확인
+        try {
+            await db.run(`DELETE FROM friendships WHERE player1_id = ? OR player2_id = ?`, [userId, userId]);
+        } catch (error) {
+            console.error('friendships 테이블 초기화 오류:', error);
+        }
+
+        try {
+            await db.run(`DELETE FROM marriages WHERE player1_id = ? OR player2_id = ?`, [userId, userId]);
+        } catch (error) {
+            console.error('marriages 테이블 초기화 오류:', error);
         }
 
         // 새로운 플레이어 데이터 생성
