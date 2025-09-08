@@ -69,6 +69,8 @@ module.exports = {
 
             const isNewPlayer = profileData.isNewPlayer || false;
             
+            console.log(`회원가입 체크 - 사용자: ${targetUser.username}, isNewPlayer: ${isNewPlayer}`);
+            
             // 프로필 임베드 생성
             const embed = await player.createProfileEmbed(profileData);
 
@@ -409,7 +411,7 @@ module.exports = {
             console.error('marriages 테이블 초기화 오류:', error);
         }
 
-        // 기존 플레이어가 완전히 삭제되었는지 확인하고 새로 생성
+        // 기존 플레이어가 완전히 삭제되었는지 확인
         try {
             const existingPlayer = await db.get('SELECT * FROM players WHERE id = ?', [userId]);
             if (existingPlayer) {
@@ -418,13 +420,10 @@ module.exports = {
                 console.log(`기존 플레이어 ${userId} 강제 삭제 완료`);
             }
             
-            // 새로운 플레이어 생성
-            const Player = require('../systems/Player');
-            const player = new Player(db);
-            await player.createPlayer(userId, '플레이어');
-            console.log(`새로운 플레이어 ${userId} 생성 완료`);
+            // 새로운 플레이어는 생성하지 않음 (회원가입 시에만 생성)
+            console.log(`플레이어 ${userId} 초기화 완료 - 회원가입 대기 중`);
         } catch (error) {
-            console.error('새 플레이어 생성 오류:', error);
+            console.error('플레이어 초기화 오류:', error);
             throw error;
         }
     }
