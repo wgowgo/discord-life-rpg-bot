@@ -344,9 +344,9 @@ module.exports = {
             { table: 'player_education', column: 'player_id' },
             { table: 'player_romance', column: 'player_id' },
             { table: 'player_farming', column: 'player_id' },
-            { table: 'chat_activity', column: 'user_id' },
-            { table: 'voice_activity', column: 'user_id' },
-            { table: 'transactions', column: 'user_id' },
+            { table: 'chat_activity', column: 'player_id' },
+            { table: 'voice_activity', column: 'player_id' },
+            { table: 'transactions', column: 'player_id' },
             { table: 'player_stats', column: 'player_id' },
             { table: 'players', column: 'id' }
         ];
