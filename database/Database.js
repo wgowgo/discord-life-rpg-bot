@@ -94,7 +94,7 @@ class Database {
             
             try {
                 await this.client.query(schema);
-                console.log('PostgreSQL 테이블이 생성되었습니다.');
+                    console.log('PostgreSQL 테이블이 생성되었습니다. (v2.0)');
                 await this.seedInitialData();
             } catch (error) {
                 console.error('PostgreSQL 테이블 생성 오류:', error);
@@ -115,7 +115,7 @@ class Database {
                         console.error('SQLite 테이블 생성 오류:', err);
                     reject(err);
                 } else {
-                        console.log('SQLite 테이블이 생성되었습니다.');
+                        console.log('SQLite 테이블이 생성되었습니다. (v2.0)');
                     this.seedInitialData().then(resolve).catch(reject);
                 }
             });
