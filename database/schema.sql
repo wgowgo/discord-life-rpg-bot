@@ -268,6 +268,9 @@ CREATE TABLE IF NOT EXISTS achievements (
     category TEXT NOT NULL,
     requirement_type TEXT NOT NULL,
     requirement_value INTEGER NOT NULL,
+    reward_type TEXT NOT NULL,
+    reward_value TEXT NOT NULL,
+    rarity TEXT NOT NULL,
     reward_money INTEGER DEFAULT 0,
     reward_exp INTEGER DEFAULT 0
 );

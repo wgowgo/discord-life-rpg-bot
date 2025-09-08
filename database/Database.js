@@ -458,68 +458,7 @@ class Database {
             { name: '행복의 열쇠', category: 'special', rarity: 'legendary', price: 10000000, stats_effect: JSON.stringify({happiness: 100}), description: '완전한 행복' }
         ];
 
-        // 기본 업적 (대폭 확장)
-        const achievements = [
-            // 경력/직업 업적 (12개)
-            { name: '첫 걸음', category: 'career', description: '첫 직장에 취직하기', requirement_type: 'job_count', requirement_value: '1', reward_type: 'money', reward_value: '10000', rarity: 'common' },
-            { name: '커리어 점프', category: 'career', description: '5개의 다른 직업 경험하기', requirement_type: 'job_count', requirement_value: '5', reward_type: 'title', reward_value: '4', rarity: 'rare' },
-            { name: '회사 충성도', category: 'career', description: '한 직장에서 1년 근무하기', requirement_type: 'job_duration', requirement_value: '365', reward_type: 'money', reward_value: '100000', rarity: 'rare' },
-            { name: '전문가', category: 'career', description: '전문직 취업하기', requirement_type: 'job_category', requirement_value: 'professional', reward_type: 'title', reward_value: '5', rarity: 'epic' },
-            { name: 'CEO의 길', category: 'career', description: 'CEO 직책 달성하기', requirement_type: 'job_name', requirement_value: 'CEO', reward_type: 'title', reward_value: '6', rarity: 'legendary' },
-            { name: '의료진', category: 'career', description: '의사 직업 취업하기', requirement_type: 'job_name', requirement_value: '의사', reward_type: 'title', reward_value: '7', rarity: 'epic' },
-            { name: '법조인', category: 'career', description: '변호사 직업 취업하기', requirement_type: 'job_name', requirement_value: '변호사', reward_type: 'title', reward_value: '8', rarity: 'epic' },
-            { name: '연예인', category: 'career', description: '가수 또는 배우 직업 취업하기', requirement_type: 'job_category', requirement_value: 'entertainment', reward_type: 'title', reward_value: '9', rarity: 'rare' },
-            { name: '스포츠 스타', category: 'career', description: '프로 스포츠 선수 취업하기', requirement_type: 'job_category', requirement_value: 'sports', reward_type: 'title', reward_value: '10', rarity: 'epic' },
-            { name: '과학자', category: 'career', description: '연구직 취업하기', requirement_type: 'job_category', requirement_value: 'science', reward_type: 'title', reward_value: '11', rarity: 'rare' },
-            { name: '창업가', category: 'career', description: '사업 시작하기', requirement_type: 'business_count', requirement_value: '1', reward_type: 'title', reward_value: '12', rarity: 'rare' },
-            { name: '월급루팡', category: 'career', description: '월급 10번 받기', requirement_type: 'salary_count', requirement_value: '10', reward_type: 'money', reward_value: '50000', rarity: 'common' },
-
-            // 재산/투자 업적 (15개)
-            { name: '백만장자', category: 'wealth', description: '100만원 모으기', requirement_type: 'money', requirement_value: '1000000', reward_type: 'title', reward_value: '1', rarity: 'common' },
-            { name: '천만장자', category: 'wealth', description: '1천만원 모으기', requirement_type: 'money', requirement_value: '10000000', reward_type: 'title', reward_value: '2', rarity: 'rare' },
-            { name: '억만장자', category: 'wealth', description: '1억원 모으기', requirement_type: 'money', requirement_value: '100000000', reward_type: 'title', reward_value: '3', rarity: 'epic' },
-            { name: '재벌', category: 'wealth', description: '10억원 모으기', requirement_type: 'money', requirement_value: '1000000000', reward_type: 'title', reward_value: '13', rarity: 'legendary' },
-            { name: '투자의 신', category: 'investment', description: '주식으로 100% 수익 달성', requirement_type: 'stock_profit', requirement_value: '100', reward_type: 'title', reward_value: '14', rarity: 'epic' },
-            { name: '주식 왕', category: 'investment', description: '주식 10번 거래하기', requirement_type: 'stock_trades', requirement_value: '10', reward_type: 'money', reward_value: '100000', rarity: 'common' },
-            { name: '부동산 투자자', category: 'investment', description: '부동산 구매하기', requirement_type: 'property_count', requirement_value: '1', reward_type: 'title', reward_value: '15', rarity: 'rare' },
-            { name: '부동산 재벌', category: 'investment', description: '부동산 5개 보유하기', requirement_type: 'property_count', requirement_value: '5', reward_type: 'title', reward_value: '16', rarity: 'epic' },
-            { name: '사업 성공', category: 'business', description: '사업 월 수익 1천만원 달성', requirement_type: 'business_profit', requirement_value: '10000000', reward_type: 'title', reward_value: '17', rarity: 'epic' },
-            { name: '사업 제국', category: 'business', description: '사업 3개 운영하기', requirement_type: 'business_count', requirement_value: '3', reward_type: 'title', reward_value: '18', rarity: 'legendary' },
-            { name: '로또 당첨자', category: 'luck', description: '로또 당첨하기', requirement_type: 'lottery_win', requirement_value: '1', reward_type: 'title', reward_value: '19', rarity: 'rare' },
-            { name: '도박 고수', category: 'luck', description: '미니게임에서 10번 승리', requirement_type: 'minigame_wins', requirement_value: '10', reward_type: 'money', reward_value: '200000', rarity: 'rare' },
-            { name: '절약왕', category: 'wealth', description: '한 달간 지출 없이 지내기', requirement_type: 'no_spending', requirement_value: '30', reward_type: 'title', reward_value: '20', rarity: 'epic' },
-            { name: '소비왕', category: 'wealth', description: '하루에 1억원 소비하기', requirement_type: 'daily_spending', requirement_value: '100000000', reward_type: 'title', reward_value: '21', rarity: 'legendary' },
-            { name: '투자 달인', category: 'investment', description: '모든 투자처에 투자하기', requirement_type: 'investment_variety', requirement_value: '10', reward_type: 'title', reward_value: '22', rarity: 'legendary' },
-
-            // 교육/성장 업적 (10개)
-            { name: '학생', category: 'education', description: '첫 교육과정 수료하기', requirement_type: 'education_count', requirement_value: '1', reward_type: 'money', reward_value: '20000', rarity: 'common' },
-            { name: '학사', category: 'education', description: '대학교육 수료하기', requirement_type: 'education_level', requirement_value: '10', reward_type: 'title', reward_value: '23', rarity: 'rare' },
-            { name: '석사', category: 'education', description: '대학원 석사 수료하기', requirement_type: 'education_level', requirement_value: '13', reward_type: 'title', reward_value: '24', rarity: 'epic' },
-            { name: '박사', category: 'education', description: '박사과정 수료하기', requirement_type: 'education_level', requirement_value: '18', reward_type: 'title', reward_value: '25', rarity: 'legendary' },
-            { name: '지식인', category: 'education', description: '지능 90 달성하기', requirement_type: 'stat', requirement_value: 'intelligence:90', reward_type: 'title', reward_value: '26', rarity: 'epic' },
-            { name: '운동선수', category: 'fitness', description: '근력 90 달성하기', requirement_type: 'stat', requirement_value: 'strength:90', reward_type: 'title', reward_value: '27', rarity: 'epic' },
-            { name: '매력왕', category: 'social', description: '매력 90 달성하기', requirement_type: 'stat', requirement_value: 'charm:90', reward_type: 'title', reward_value: '28', rarity: 'epic' },
-            { name: '행운아', category: 'luck', description: '행운 90 달성하기', requirement_type: 'stat', requirement_value: 'luck:90', reward_type: 'title', reward_value: '29', rarity: 'epic' },
-            { name: '완벽주의자', category: 'achievement', description: '모든 스탯 80 이상 달성', requirement_type: 'all_stats', requirement_value: '80', reward_type: 'title', reward_value: '30', rarity: 'legendary' },
-            { name: '평생학습자', category: 'education', description: '10개 교육과정 수료하기', requirement_type: 'education_count', requirement_value: '10', reward_type: 'title', reward_value: '31', rarity: 'epic' },
-
-            // 사회/관계 업적 (8개)
-            { name: '연인', category: 'romance', description: '연인 만들기', requirement_type: 'relationship', requirement_value: 'dating', reward_type: 'title', reward_value: '32', rarity: 'rare' },
-            { name: '신혼', category: 'romance', description: '결혼하기', requirement_type: 'relationship', requirement_value: 'married', reward_type: 'title', reward_value: '33', rarity: 'epic' },
-            { name: '로맨티스트', category: 'romance', description: '선물 10번 주기', requirement_type: 'gift_count', requirement_value: '10', reward_type: 'title', reward_value: '34', rarity: 'rare' },
-            { name: '펫 애호가', category: 'pets', description: '펫 구매하기', requirement_type: 'pet_count', requirement_value: '1', reward_type: 'title', reward_value: '35', rarity: 'common' },
-            { name: '펫 수집가', category: 'pets', description: '펫 5마리 보유하기', requirement_type: 'pet_count', requirement_value: '5', reward_type: 'title', reward_value: '36', rarity: 'epic' },
-            { name: '던전 탐험가', category: 'adventure', description: '던전 10번 클리어하기', requirement_type: 'dungeon_clears', requirement_value: '10', reward_type: 'title', reward_value: '37', rarity: 'rare' },
-            { name: '던전 마스터', category: 'adventure', description: '모든 던전 클리어하기', requirement_type: 'all_dungeons', requirement_value: '1', reward_type: 'title', reward_value: '38', rarity: 'legendary' },
-            { name: '활동왕', category: 'activity', description: '채팅 1000번 하기', requirement_type: 'chat_count', requirement_value: '1000', reward_type: 'title', reward_value: '39', rarity: 'rare' },
-
-            // 특별 업적 (5개)
-            { name: '게임 마스터', category: 'special', description: '모든 시스템 경험하기', requirement_type: 'system_complete', requirement_value: '1', reward_type: 'title', reward_value: '40', rarity: 'legendary' },
-            { name: '컬렉터', category: 'collection', description: '아이템 50개 보유하기', requirement_type: 'item_count', requirement_value: '50', reward_type: 'title', reward_value: '41', rarity: 'epic' },
-            { name: '전설의 플레이어', category: 'special', description: '레벨 50 달성하기', requirement_type: 'level', requirement_value: '50', reward_type: 'title', reward_value: '42', rarity: 'legendary' },
-            { name: '오래된 친구', category: 'special', description: '게임 시작 후 1년 경과', requirement_type: 'play_time', requirement_value: '365', reward_type: 'title', reward_value: '43', rarity: 'epic' },
-            { name: '신화의 존재', category: 'special', description: '모든 레전더리 업적 달성', requirement_type: 'legendary_count', requirement_value: '10', reward_type: 'title', reward_value: '44', rarity: 'mythic' }
-        ];
+        // 업적 데이터는 AchievementSystem.js에서 관리
 
         // 기본 칭호 (대폭 확장)
         const titles = [
