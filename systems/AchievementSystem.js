@@ -114,6 +114,11 @@ class AchievementSystem {
             )
         `);
 
+        // 기존 테이블에 icon 컬럼 추가 (없는 경우)
+        await this.db.run(`
+            ALTER TABLE achievements ADD COLUMN icon TEXT DEFAULT '🏆'
+        `).catch(() => {}); // 이미 존재하면 무시
+
         // 플레이어 업적 테이블 생성
         await this.db.run(`
             CREATE TABLE IF NOT EXISTS player_achievements (
