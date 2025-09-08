@@ -107,6 +107,7 @@ class Database {
             
             // PostgreSQL 문법을 SQLite 문법으로 변환
             schema = schema.replace(/SERIAL PRIMARY KEY/g, 'INTEGER PRIMARY KEY AUTOINCREMENT');
+            schema = schema.replace(/TIMESTAMP/g, 'DATETIME');
         
         return new Promise((resolve, reject) => {
                 this.client.exec(schema, (err) => {

@@ -7,8 +7,8 @@ CREATE TABLE IF NOT EXISTS players (
     level INTEGER DEFAULT 1,
     experience INTEGER DEFAULT 0,
     money REAL DEFAULT 10000,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    last_active DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_active TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 플레이어 스탯 (직업/일상용)
@@ -65,8 +65,8 @@ CREATE TABLE IF NOT EXISTS player_jobs (
     id SERIAL PRIMARY KEY,
     player_id TEXT NOT NULL,
     job_id INTEGER NOT NULL,
-    start_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    end_date DATETIME,
+    start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_date TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (player_id) REFERENCES players(id),
     FOREIGN KEY (job_id) REFERENCES jobs(id)
@@ -75,8 +75,8 @@ CREATE TABLE IF NOT EXISTS player_jobs (
 -- 직업 쿨다운
 CREATE TABLE IF NOT EXISTS job_cooldowns (
     player_id TEXT PRIMARY KEY,
-    last_quit_date DATETIME,
-    cooldown_until DATETIME,
+    last_quit_date TIMESTAMP,
+    cooldown_until TIMESTAMP,
     FOREIGN KEY (player_id) REFERENCES players(id)
 );
 
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS stocks (
     market_cap REAL DEFAULT 0,
     sector TEXT,
     description TEXT,
-    last_updated DATETIME DEFAULT CURRENT_TIMESTAMP
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 플레이어 주식 포트폴리오
@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS player_stocks (
     stock_symbol TEXT NOT NULL,
     quantity INTEGER NOT NULL,
     average_price REAL NOT NULL,
-    purchase_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (player_id) REFERENCES players(id),
     FOREIGN KEY (stock_symbol) REFERENCES stocks(symbol)
 );
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     stock_symbol TEXT,
     quantity INTEGER,
     price REAL,
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (player_id) REFERENCES players(id)
 );
 
@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS player_properties (
     player_id TEXT NOT NULL,
     property_id INTEGER NOT NULL,
     purchase_price REAL NOT NULL,
-    purchase_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (player_id) REFERENCES players(id),
     FOREIGN KEY (property_id) REFERENCES properties(id)
 );
@@ -168,7 +168,7 @@ CREATE TABLE IF NOT EXISTS player_businesses (
     staff_count INTEGER DEFAULT 0,
     reputation INTEGER DEFAULT 50,
     monthly_profit REAL DEFAULT 0,
-    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (player_id) REFERENCES players(id),
     FOREIGN KEY (business_type_id) REFERENCES business_types(id)
@@ -191,8 +191,8 @@ CREATE TABLE IF NOT EXISTS player_education (
     id SERIAL PRIMARY KEY,
     player_id TEXT NOT NULL,
     course_id INTEGER NOT NULL,
-    start_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    completion_date DATETIME,
+    start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completion_date TIMESTAMP,
     progress INTEGER DEFAULT 0,
     is_completed BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (player_id) REFERENCES players(id),
@@ -216,7 +216,7 @@ CREATE TABLE IF NOT EXISTS player_dungeons (
     id SERIAL PRIMARY KEY,
     player_id TEXT NOT NULL,
     dungeon_id INTEGER NOT NULL,
-    completion_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    completion_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     success BOOLEAN DEFAULT FALSE,
     rewards_received TEXT,
     FOREIGN KEY (player_id) REFERENCES players(id),
@@ -230,8 +230,8 @@ CREATE TABLE IF NOT EXISTS relationships (
     player2_id TEXT NOT NULL,
     relationship_type TEXT NOT NULL, -- 'friendship', 'romance', 'marriage'
     status TEXT NOT NULL, -- 'active', 'broken', 'divorced'
-    start_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    end_date DATETIME,
+    start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_date TIMESTAMP,
     FOREIGN KEY (player1_id) REFERENCES players(id),
     FOREIGN KEY (player2_id) REFERENCES players(id)
 );
@@ -242,7 +242,7 @@ CREATE TABLE IF NOT EXISTS friendships (
     player1_id TEXT NOT NULL,
     player2_id TEXT NOT NULL,
     status TEXT NOT NULL, -- 'pending', 'accepted', 'blocked'
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (player1_id) REFERENCES players(id),
     FOREIGN KEY (player2_id) REFERENCES players(id)
 );
@@ -252,9 +252,9 @@ CREATE TABLE IF NOT EXISTS marriages (
     id SERIAL PRIMARY KEY,
     player1_id TEXT NOT NULL,
     player2_id TEXT NOT NULL,
-    wedding_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    wedding_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status TEXT NOT NULL, -- 'married', 'divorced'
-    divorce_date DATETIME,
+    divorce_date TIMESTAMP,
     FOREIGN KEY (player1_id) REFERENCES players(id),
     FOREIGN KEY (player2_id) REFERENCES players(id)
 );
@@ -277,7 +277,7 @@ CREATE TABLE IF NOT EXISTS player_achievements (
     id SERIAL PRIMARY KEY,
     player_id TEXT NOT NULL,
     achievement_id TEXT NOT NULL,
-    unlocked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(player_id, achievement_id),
     FOREIGN KEY (player_id) REFERENCES players(id),
     FOREIGN KEY (achievement_id) REFERENCES achievements(id)
@@ -319,7 +319,7 @@ CREATE TABLE IF NOT EXISTS player_inventory (
     player_id TEXT NOT NULL,
     item_id INTEGER NOT NULL,
     quantity INTEGER DEFAULT 1,
-    obtained_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    obtained_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(player_id, item_id),
     FOREIGN KEY (player_id) REFERENCES players(id),
     FOREIGN KEY (item_id) REFERENCES shop_items(id)
@@ -332,7 +332,7 @@ CREATE TABLE IF NOT EXISTS player_tools (
     tool_type TEXT NOT NULL, -- 'fishing_rod', 'pickaxe', 'hoe'
     tool_id TEXT NOT NULL,
     durability INTEGER NOT NULL,
-    obtained_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    obtained_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (player_id) REFERENCES players(id)
 );
 
@@ -352,8 +352,8 @@ CREATE TABLE IF NOT EXISTS private_channels (
     player_id TEXT NOT NULL,
     channel_id TEXT NOT NULL,
     guild_id TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    expires_at DATETIME,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (player_id) REFERENCES players(id)
 );
