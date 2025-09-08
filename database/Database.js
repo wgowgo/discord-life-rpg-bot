@@ -11,7 +11,10 @@ class Database {
     async init() {
         try {
             // Railway에서 DATABASE_URL 환경변수 사용, 없으면 로컬 SQLite 사용
-            if (process.env.DATABASE_URL) {
+            if (process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== '') {
+                console.log('DATABASE_URL 발견, PostgreSQL 연결 시도 중...');
+                console.log('DATABASE_URL:', process.env.DATABASE_URL.substring(0, 20) + '...');
+                
                 this.client = new Client({
                     connectionString: process.env.DATABASE_URL,
                     ssl: {
@@ -22,6 +25,7 @@ class Database {
                 console.log('PostgreSQL 데이터베이스에 연결되었습니다.');
                 await this.createTables();
             } else {
+                console.log('DATABASE_URL이 없거나 비어있음, SQLite 사용');
                 // 로컬 개발용 SQLite 연결
                 const sqlite3 = require('sqlite3').verbose();
                 const filename = 'game.db';
@@ -39,7 +43,27 @@ class Database {
             }
         } catch (error) {
             console.error('데이터베이스 초기화 오류:', error);
-            throw error;
+            console.log('SQLite로 폴백 시도 중...');
+            
+            try {
+                // PostgreSQL 연결 실패 시 SQLite로 폴백
+                const sqlite3 = require('sqlite3').verbose();
+                const filename = 'game.db';
+                const dbPath = path.join(__dirname, filename);
+                
+                this.client = new sqlite3.Database(dbPath, (err) => {
+                    if (err) {
+                        console.error('SQLite 폴백도 실패:', err);
+                        throw err;
+                    } else {
+                        console.log('SQLite 데이터베이스로 폴백 성공');
+                    }
+                });
+                await this.createTables();
+            } catch (fallbackError) {
+                console.error('모든 데이터베이스 연결 실패:', fallbackError);
+                throw fallbackError;
+            }
         }
     }
 
