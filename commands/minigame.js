@@ -8,25 +8,25 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('주사위')
-                .setDescription('주사위 게임을 합니다')
+                .setDescription('주사위 게임을 합니다 (회원가입 필요)')
                 .addIntegerOption(option =>
                     option.setName('베팅금액')
-                        .setDescription('베팅할 금액')
+                        .setDescription('베팅할 금액 (1,000원 ~ 1,000,000원)')
                         .setRequired(true)
                         .setMinValue(1000)
                         .setMaxValue(1000000)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('로또')
-                .setDescription('로또를 구매합니다 (1만원)'))
+                .setDescription('로또를 구매합니다 (회원가입 필요, 10,000원)'))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('숫자맞추기')
-                .setDescription('숫자 맞추기 게임을 시작합니다'))
+                .setDescription('숫자 맞추기 게임을 시작합니다 (회원가입 필요)'))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('가위바위보')
-                .setDescription('가위바위보 게임을 합니다')
+                .setDescription('가위바위보 게임을 합니다 (회원가입 필요)')
                 .addStringOption(option =>
                     option.setName('선택')
                         .setDescription('가위, 바위, 보 중 선택')
@@ -38,24 +38,24 @@ module.exports = {
                         ))
                 .addIntegerOption(option =>
                     option.setName('베팅금액')
-                        .setDescription('베팅할 금액')
+                        .setDescription('베팅할 금액 (1,000원 ~ 500,000원)')
                         .setRequired(true)
                         .setMinValue(1000)
                         .setMaxValue(500000)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('슬롯머신')
-                .setDescription('슬롯머신 게임을 합니다')
+                .setDescription('슬롯머신 게임을 합니다 (회원가입 필요)')
                 .addIntegerOption(option =>
                     option.setName('베팅금액')
-                        .setDescription('베팅할 금액')
+                        .setDescription('베팅할 금액 (5,000원 ~ 100,000원)')
                         .setRequired(true)
                         .setMinValue(5000)
                         .setMaxValue(100000)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('통계')
-                .setDescription('내 미니게임 통계를 확인합니다')),
+                .setDescription('내 미니게임 통계를 확인합니다 (회원가입 필요)')),
 
     async execute(interaction, db) {
         const minigameSystem = new MinigameSystem(db);
@@ -269,95 +269,131 @@ module.exports = {
     },
 
     async handleRockPaperScissors(interaction, minigameSystem, userId) {
-        const choice = interaction.options.getString('선택');
-        const betAmount = interaction.options.getInteger('베팅금액');
-        
-        const result = await minigameSystem.playRockPaperScissors(userId, choice, betAmount);
-        
-        const embed = new EmbedBuilder()
-            .setColor(result.success ? '#0099ff' : '#ff0000')
-            .setTitle('✂️🗿📄 가위바위보')
-            .setTimestamp();
+        try {
+            const choice = interaction.options.getString('선택');
+            const betAmount = interaction.options.getInteger('베팅금액');
+            
+            // 플레이어 존재 확인
+            const player = await minigameSystem.db.get('SELECT * FROM players WHERE id = ?', [userId]);
+            if (!player) {
+                await interaction.reply({ 
+                    content: '먼저 게임을 시작해주세요. `/프로필 회원가입` 명령어를 사용하세요.', 
+                    ephemeral: true 
+                });
+                return;
+            }
+            
+            const result = await minigameSystem.playRockPaperScissors(userId, choice, betAmount);
+            
+            const embed = new EmbedBuilder()
+                .setColor(result.success ? '#0099ff' : '#ff0000')
+                .setTitle('✂️🗿📄 가위바위보')
+                .setTimestamp();
 
-        if (result.success) {
-            const resultColor = result.result === '승리' ? '#00ff00' : 
-                               result.result === '패배' ? '#ff0000' : '#ffff00';
-            
-            const choiceEmojis = { '가위': '✂️', '바위': '🗿', '보': '📄' };
-            
-            embed.setColor(resultColor)
-                .addFields(
-                    {
-                        name: '🎯 선택',
-                        value: `당신: ${choiceEmojis[result.playerChoice]} ${result.playerChoice}\n봇: ${choiceEmojis[result.botChoice]} ${result.botChoice}`,
-                        inline: true
-                    },
-                    {
-                        name: '🏆 결과',
-                        value: result.result,
-                        inline: true
-                    },
-                    {
-                        name: '💰 손익',
-                        value: result.winAmount >= 0 ? 
-                            `+${result.winAmount.toLocaleString()}원` : 
-                            `${result.winAmount.toLocaleString()}원`,
-                        inline: true
-                    }
-                );
-        } else {
-            embed.setDescription(result.message);
+            if (result.success) {
+                const resultColor = result.result === '승리' ? '#00ff00' : 
+                                   result.result === '패배' ? '#ff0000' : '#ffff00';
+                
+                const choiceEmojis = { '가위': '✂️', '바위': '🗿', '보': '📄' };
+                
+                embed.setColor(resultColor)
+                    .addFields(
+                        {
+                            name: '🎯 선택',
+                            value: `당신: ${choiceEmojis[result.playerChoice]} ${result.playerChoice}\n봇: ${choiceEmojis[result.botChoice]} ${result.botChoice}`,
+                            inline: true
+                        },
+                        {
+                            name: '🏆 결과',
+                            value: result.result,
+                            inline: true
+                        },
+                        {
+                            name: '💰 손익',
+                            value: result.winAmount >= 0 ? 
+                                `+${result.winAmount.toLocaleString()}원` : 
+                                `${result.winAmount.toLocaleString()}원`,
+                            inline: true
+                        }
+                    );
+            } else {
+                embed.setDescription(result.message);
+            }
+
+            await interaction.reply({ embeds: [embed] });
+        } catch (error) {
+            console.error('가위바위보 오류:', error);
+            await interaction.reply({ 
+                content: '가위바위보 게임 실행 중 오류가 발생했습니다.', 
+                ephemeral: true 
+            });
         }
-
-        await interaction.reply({ embeds: [embed] });
     },
 
     async handleSlotMachine(interaction, minigameSystem, userId) {
-        const betAmount = interaction.options.getInteger('베팅금액');
-        
-        const result = await minigameSystem.playSlotMachine(userId, betAmount);
-        
-        const embed = new EmbedBuilder()
-            .setColor(result.success ? '#0099ff' : '#ff0000')
-            .setTitle('🎰 슬롯머신')
-            .setTimestamp();
-
-        if (result.success) {
-            const resultColor = result.winAmount > 0 ? '#00ff00' : '#ff0000';
+        try {
+            const betAmount = interaction.options.getInteger('베팅금액');
             
-            embed.setColor(resultColor)
-                .addFields(
-                    {
-                        name: '🎯 결과',
-                        value: `${result.reels.join(' | ')}`,
-                        inline: false
-                    },
-                    {
-                        name: '🏆 판정',
-                        value: result.result,
-                        inline: true
-                    },
-                    {
-                        name: '💰 손익',
-                        value: result.winAmount >= 0 ? 
-                            `+${result.winAmount.toLocaleString()}원` : 
-                            `${result.winAmount.toLocaleString()}원`,
-                        inline: true
-                    }
-                );
-
-            if (result.multiplier > 0) {
-                embed.addFields({
-                    name: '📊 배수',
-                    value: `${result.multiplier}x`,
-                    inline: true
+            // 플레이어 존재 확인
+            const player = await minigameSystem.db.get('SELECT * FROM players WHERE id = ?', [userId]);
+            if (!player) {
+                await interaction.reply({ 
+                    content: '먼저 게임을 시작해주세요. `/프로필 회원가입` 명령어를 사용하세요.', 
+                    ephemeral: true 
                 });
+                return;
             }
-        } else {
-            embed.setDescription(result.message);
-        }
+            
+            const result = await minigameSystem.playSlotMachine(userId, betAmount);
+            
+            const embed = new EmbedBuilder()
+                .setColor(result.success ? '#0099ff' : '#ff0000')
+                .setTitle('🎰 슬롯머신')
+                .setTimestamp();
 
-        await interaction.reply({ embeds: [embed] });
+            if (result.success) {
+                const resultColor = result.winAmount > 0 ? '#00ff00' : '#ff0000';
+                
+                embed.setColor(resultColor)
+                    .addFields(
+                        {
+                            name: '🎯 결과',
+                            value: `${result.reels.join(' | ')}`,
+                            inline: false
+                        },
+                        {
+                            name: '🏆 판정',
+                            value: result.result,
+                            inline: true
+                        },
+                        {
+                            name: '💰 손익',
+                            value: result.winAmount >= 0 ? 
+                                `+${result.winAmount.toLocaleString()}원` : 
+                                `${result.winAmount.toLocaleString()}원`,
+                            inline: true
+                        }
+                    );
+
+                if (result.multiplier > 0) {
+                    embed.addFields({
+                        name: '📊 배수',
+                        value: `${result.multiplier}x`,
+                        inline: true
+                    });
+                }
+            } else {
+                embed.setDescription(result.message);
+            }
+
+            await interaction.reply({ embeds: [embed] });
+        } catch (error) {
+            console.error('슬롯머신 오류:', error);
+            await interaction.reply({ 
+                content: '슬롯머신 게임 실행 중 오류가 발생했습니다.', 
+                ephemeral: true 
+            });
+        }
     },
 
     async handleStats(interaction, minigameSystem, userId) {

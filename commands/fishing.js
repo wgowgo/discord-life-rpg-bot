@@ -8,11 +8,11 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('시작')
-                .setDescription('낚시를 시작합니다'))
+                .setDescription('낚시를 시작합니다 (회원가입 필요)'))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('낚시대')
-                .setDescription('보유한 낚시대를 확인합니다'))
+                .setDescription('보유한 낚시대를 확인합니다 (회원가입 필요)'))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('상점')
@@ -20,7 +20,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('구매')
-                .setDescription('낚시대를 구매합니다')
+                .setDescription('낚시대를 구매합니다 (회원가입 필요)')
                 .addStringOption(option =>
                     option.setName('낚시대')
                         .setDescription('구매할 낚시대')
