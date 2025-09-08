@@ -228,7 +228,7 @@ module.exports = {
         await interaction.reply({
             embeds: [confirmEmbed],
             components: [confirmRow],
-            ephemeral: true
+            flags: 64 // MessageFlags.Ephemeral
         });
 
         // 버튼 상호작용 수집기
@@ -239,47 +239,86 @@ module.exports = {
 
         collector.on('collect', async (btnInteraction) => {
             if (btnInteraction.customId === 'reset_confirm') {
-                // 바로 초기화 실행 (2단계 제거)
-                try {
-                    await this.performDataReset(db, userId, interaction);
-                    
-                    const successEmbed = new EmbedBuilder()
-                        .setColor(0x4CAF50)
-                        .setTitle('✅ 초기화 완료')
-                        .setDescription('프로필 데이터가 성공적으로 초기화되었습니다!\n\n' +
-                                       '**다음이 완료되었습니다:**\n' +
-                                       '• 기존 개인 채널 삭제\n' +
-                                       '• 모든 게임 데이터 초기화\n' +
-                                       '• 새로운 캐릭터 생성\n\n' +
-                                       '`/프로필 회원가입` 명령어로 새 캐릭터를 확인하고 개인 채널을 다시 생성하세요! 🎮')
-                        .addFields(
-                            {
-                                name: '🚀 다음 단계',
-                                value: '1. `/프로필 회원가입` - 새 캐릭터 확인 및 개인 채널 생성\n2. `/직업 목록` - 직업 구하기\n3. `/도움말` - 게임 가이드 보기',
-                                inline: false
-                            }
-                        )
-                        .setFooter({ text: '새로운 모험을 시작해보세요!' });
+                // 2단계 확인: 채팅으로 "프로필초기화" 입력 요구
+                const secondConfirmEmbed = new EmbedBuilder()
+                    .setColor(0xFF4444)
+                    .setTitle('⚠️ 최종 확인 필요')
+                    .setDescription('**정말로 초기화하시겠습니까?**\n\n' +
+                                   '이번이 **마지막 기회**입니다!\n' +
+                                   '정말로 초기화하려면 아래 문구를 **정확히** 입력해주세요:\n\n' +
+                                   '**`프로필초기화`**\n\n' +
+                                   '⏰ **30초 내에 입력하지 않으면 자동으로 취소됩니다.**')
+                    .setFooter({ text: '이 작업은 되돌릴 수 없습니다!' });
 
-                    await btnInteraction.update({
-                        embeds: [successEmbed],
-                        components: []
-                    });
+                await btnInteraction.update({
+                    embeds: [secondConfirmEmbed],
+                    components: []
+                });
 
-                    console.log(`플레이어 ${userId}의 데이터가 초기화되었습니다.`);
-                } catch (error) {
-                    console.error('데이터 초기화 오류:', error);
-                    
-                    const errorEmbed = new EmbedBuilder()
-                        .setColor(0xFF0000)
-                        .setTitle('❌ 초기화 실패')
-                        .setDescription('데이터 초기화 중 오류가 발생했습니다.\n관리자에게 문의해주세요.');
+                // 채팅 메시지 수집기 (30초)
+                const messageCollector = interaction.channel.createMessageCollector({
+                    filter: (message) => message.author.id === userId && message.content === '프로필초기화',
+                    time: 30000, // 30초
+                    max: 1
+                });
 
-                    await btnInteraction.update({
-                        embeds: [errorEmbed],
-                        components: []
-                    });
-                }
+                messageCollector.on('collect', async (message) => {
+                    try {
+                        await this.performDataReset(db, userId, interaction);
+                        
+                        const successEmbed = new EmbedBuilder()
+                            .setColor(0x4CAF50)
+                            .setTitle('✅ 초기화 완료')
+                            .setDescription('프로필 데이터가 성공적으로 초기화되었습니다!\n\n' +
+                                           '**다음이 완료되었습니다:**\n' +
+                                           '• 기존 개인 채널 삭제\n' +
+                                           '• 모든 게임 데이터 초기화\n' +
+                                           '• 새로운 캐릭터 생성\n\n' +
+                                           '`/프로필 회원가입` 명령어로 새 캐릭터를 확인하고 개인 채널을 다시 생성하세요! 🎮')
+                            .addFields(
+                                {
+                                    name: '🚀 다음 단계',
+                                    value: '1. `/프로필 회원가입` - 새 캐릭터 확인 및 개인 채널 생성\n2. `/직업 목록` - 직업 구하기\n3. `/도움말` - 게임 가이드 보기',
+                                    inline: false
+                                }
+                            )
+                            .setFooter({ text: '새로운 모험을 시작해보세요!' });
+
+                        await interaction.editReply({
+                            embeds: [successEmbed],
+                            components: []
+                        });
+
+                        console.log(`플레이어 ${userId}의 데이터가 초기화되었습니다.`);
+                    } catch (error) {
+                        console.error('데이터 초기화 오류:', error);
+                        
+                        const errorEmbed = new EmbedBuilder()
+                            .setColor(0xFF0000)
+                            .setTitle('❌ 초기화 실패')
+                            .setDescription('데이터 초기화 중 오류가 발생했습니다.\n관리자에게 문의해주세요.');
+
+                        await interaction.editReply({
+                            embeds: [errorEmbed],
+                            components: []
+                        });
+                    }
+                });
+
+                messageCollector.on('end', async (collected) => {
+                    if (collected.size === 0) {
+                        const timeoutEmbed = new EmbedBuilder()
+                            .setColor(0x808080)
+                            .setTitle('⏰ 시간 초과')
+                            .setDescription('30초 내에 확인 문구를 입력하지 않아 초기화가 취소되었습니다.')
+                            .setTimestamp();
+                        
+                        await interaction.editReply({
+                            embeds: [timeoutEmbed],
+                            components: []
+                        });
+                    }
+                });
             } else if (btnInteraction.customId === 'reset_cancel') {
                 const cancelEmbed = new EmbedBuilder()
                     .setColor(0x4CAF50)
@@ -329,7 +368,7 @@ module.exports = {
             console.error('개인 채널 삭제 오류:', error);
         }
 
-        // 모든 플레이어 관련 데이터 삭제 (테이블별 올바른 컬럼명 사용)
+        // 모든 플레이어 관련 데이터 삭제 (실제 존재하는 테이블만)
         const tablesToReset = [
             { table: 'player_achievements', column: 'player_id' },
             { table: 'player_titles', column: 'player_id' },
@@ -342,8 +381,6 @@ module.exports = {
             { table: 'player_challenges', column: 'player_id' },
             { table: 'player_businesses', column: 'player_id' },
             { table: 'player_education', column: 'player_id' },
-            { table: 'player_romance', column: 'player_id' },
-            { table: 'player_farming', column: 'player_id' },
             { table: 'chat_activity', column: 'player_id' },
             { table: 'voice_activity', column: 'player_id' },
             { table: 'transactions', column: 'player_id' },
@@ -372,10 +409,24 @@ module.exports = {
             console.error('marriages 테이블 초기화 오류:', error);
         }
 
-        // 새로운 플레이어 데이터 생성
-        const Player = require('../systems/Player');
-        const player = new Player(db);
-        await player.createPlayer(userId, '플레이어');
+        // 기존 플레이어가 완전히 삭제되었는지 확인하고 새로 생성
+        try {
+            const existingPlayer = await db.get('SELECT * FROM players WHERE id = ?', [userId]);
+            if (existingPlayer) {
+                // 기존 플레이어가 남아있다면 강제 삭제
+                await db.run('DELETE FROM players WHERE id = ?', [userId]);
+                console.log(`기존 플레이어 ${userId} 강제 삭제 완료`);
+            }
+            
+            // 새로운 플레이어 생성
+            const Player = require('../systems/Player');
+            const player = new Player(db);
+            await player.createPlayer(userId, '플레이어');
+            console.log(`새로운 플레이어 ${userId} 생성 완료`);
+        } catch (error) {
+            console.error('새 플레이어 생성 오류:', error);
+            throw error;
+        }
     }
 };
 
