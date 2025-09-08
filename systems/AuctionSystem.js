@@ -830,7 +830,7 @@ class AuctionSystem {
         // 시작가를 10% 낮춰서 재경매
         const newStartingPrice = Math.floor(auction.starting_price * 0.9);
         
-        await this.db.query(`
+        await this.db.run(`
             UPDATE auctions 
             SET status = 'active',
                 starting_price = ?,
@@ -846,7 +846,7 @@ class AuctionSystem {
     // 관심 목록 시스템
     async addToWatchlist(playerId, auctionId) {
         try {
-            await this.db.query(`
+            await this.db.run(`
                 INSERT OR IGNORE INTO auction_watchlist (player_id, auction_id) 
                 VALUES (?, ?)
             `, [playerId, auctionId]);
@@ -858,7 +858,7 @@ class AuctionSystem {
     }
 
     async removeFromWatchlist(playerId, auctionId) {
-        await this.db.query(`
+        await this.db.run(`
             DELETE FROM auction_watchlist 
             WHERE player_id = ? AND auction_id = ?
         `, [playerId, auctionId]);
@@ -867,7 +867,7 @@ class AuctionSystem {
     }
 
     async getWatchlist(playerId) {
-        return await this.db.query(`
+        return await this.db.run(`
             SELECT a.*, aw.added_at as watched_at
             FROM auctions a
             JOIN auction_watchlist aw ON a.id = aw.auction_id
@@ -901,7 +901,7 @@ class AuctionSystem {
         }
 
         // 관심 목록에 추가한 사용자들에게 알림
-        const watchers = await this.db.query(`
+        const watchers = await this.db.run(`
             SELECT player_id FROM auction_watchlist 
             WHERE auction_id = ? AND player_id NOT IN (?, ?)
         `, [auctionId, bidderId, auction.seller_id]);
@@ -916,7 +916,7 @@ class AuctionSystem {
     }
 
     async addNotification(playerId, type, data) {
-        await this.db.query(`
+        await this.db.run(`
             INSERT INTO auction_notifications 
             (player_id, notification_type, notification_data, is_read) 
             VALUES (?, ?, ?, 0)
@@ -926,7 +926,7 @@ class AuctionSystem {
     async getPlayerNotifications(playerId, unreadOnly = false) {
         const whereClause = unreadOnly ? 'WHERE player_id = ? AND is_read = 0' : 'WHERE player_id = ?';
         
-        return await this.db.query(`
+        return await this.db.run(`
             SELECT * FROM auction_notifications 
             ${whereClause}
             ORDER BY created_at DESC LIMIT 50
@@ -934,7 +934,7 @@ class AuctionSystem {
     }
 
     async markNotificationAsRead(notificationId) {
-        await this.db.query(`
+        await this.db.run(`
             UPDATE auction_notifications 
             SET is_read = 1 
             WHERE id = ?
@@ -943,7 +943,7 @@ class AuctionSystem {
 
     // 경매 통계 시스템
     async getPlayerAuctionStats(playerId) {
-        const [sellingStats] = await this.db.query(`
+        const [sellingStats] = await this.db.run(`
             SELECT 
                 COUNT(*) as total_auctions,
                 COUNT(CASE WHEN status = 'completed' THEN 1 END) as successful_sales,
@@ -954,7 +954,7 @@ class AuctionSystem {
             WHERE seller_id = ?
         `, [playerId]);
 
-        const [biddingStats] = await this.db.query(`
+        const [biddingStats] = await this.db.run(`
             SELECT 
                 COUNT(DISTINCT auction_id) as auctions_bid_on,
                 COUNT(CASE WHEN won = 1 THEN 1 END) as auctions_won,
@@ -981,7 +981,7 @@ class AuctionSystem {
         
         params.push(timeframe);
 
-        return await this.db.query(`
+        return await this.db.run(`
             SELECT 
                 item_name,
                 category,
@@ -1086,7 +1086,7 @@ class AuctionSystem {
         
         query += ` LIMIT ${options.limit || 50}`;
         
-        return await this.db.query(query, params);
+        return await this.db.run(query, params);
     }
 }
 

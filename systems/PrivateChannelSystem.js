@@ -10,7 +10,7 @@ class PrivateChannelSystem {
 
     async initializePrivateChannelSystem() {
         // 개인 채널 정보를 저장할 테이블 생성
-        await this.db.query(`
+        await this.db.run(`
             CREATE TABLE IF NOT EXISTS private_channels (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 session_id TEXT UNIQUE NOT NULL,
@@ -101,7 +101,7 @@ class PrivateChannelSystem {
             // 채널 정보 저장
             const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30분 후 만료
             
-            await this.db.query(`
+            await this.db.run(`
                 INSERT INTO private_channels 
                 (session_id, channel_id, user_id, channel_type, expires_at) 
                 VALUES (?, ?, ?, ?, ?)
@@ -472,7 +472,7 @@ class PrivateChannelSystem {
             const sessionData = this.channelSessions.get(channelId);
             
             // 데이터베이스에서 제거
-            await this.db.query(
+            await this.db.run(
                 'UPDATE private_channels SET is_active = 0 WHERE channel_id = ?',
                 [channelId]
             );
@@ -520,7 +520,7 @@ class PrivateChannelSystem {
             const now = new Date().toISOString();
             
             // 만료된 채널 조회
-            const expiredChannels = await this.db.query(
+            const expiredChannels = await this.db.run(
                 'SELECT * FROM private_channels WHERE expires_at < ? AND is_active = 1',
                 [now]
             );

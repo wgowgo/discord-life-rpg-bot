@@ -347,7 +347,7 @@ class CraftingSystem {
         await this.seedCraftingData();
 
         // 장비 합성 테이블 생성
-        await this.db.query(`
+        await this.db.run(`
             CREATE TABLE IF NOT EXISTS equipment_synthesis (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id TEXT NOT NULL,
@@ -1137,7 +1137,7 @@ class CraftingSystem {
 
     // 합성 기록 저장
     async recordSynthesis(playerId, baseItem, materials, result, type, success) {
-        await this.db.query(`
+        await this.db.run(`
             INSERT INTO equipment_synthesis 
             (player_id, base_item, material_items, result_item, synthesis_type, success) 
             VALUES (?, ?, ?, ?, ?, ?)
@@ -2306,7 +2306,7 @@ class CraftingSystem {
     }
 
     async getSynthesisHistory(playerId) {
-        return await this.db.query(
+        return await this.db.run(
             'SELECT * FROM equipment_synthesis WHERE player_id = ? ORDER BY created_at DESC LIMIT 20',
             [playerId]
         );

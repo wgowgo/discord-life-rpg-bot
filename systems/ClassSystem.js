@@ -308,7 +308,7 @@ class ClassSystem {
 
     async initializeClassSystem() {
         // 직업 테이블 생성
-        await this.db.query(`
+        await this.db.run(`
             CREATE TABLE IF NOT EXISTS player_classes (
                 player_id TEXT PRIMARY KEY,
                 current_class TEXT NOT NULL DEFAULT 'warrior',
@@ -322,7 +322,7 @@ class ClassSystem {
         `);
 
         // 직업별 스킬 테이블
-        await this.db.query(`
+        await this.db.run(`
             CREATE TABLE IF NOT EXISTS player_class_skills (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id TEXT NOT NULL,
@@ -339,14 +339,14 @@ class ClassSystem {
     }
 
     async getPlayerClass(playerId) {
-        const result = await this.db.query(
+        const result = await this.db.run(
             'SELECT * FROM player_classes WHERE player_id = ?',
             [playerId]
         );
 
         if (result.length === 0) {
             // 새 플레이어는 기본 직업 설정
-            await this.db.query(
+            await this.db.run(
                 'INSERT INTO player_classes (player_id) VALUES (?)',
                 [playerId]
             );
@@ -381,7 +381,7 @@ class ClassSystem {
             return { success: false, message: '이미 해당 직업입니다.' };
         }
 
-        await this.db.query(`
+        await this.db.run(`
             UPDATE player_classes 
             SET current_class = ?, 
                 total_class_changes = total_class_changes + 1,
@@ -428,7 +428,7 @@ class ClassSystem {
         }
 
         if (newUnlocks.length > 0) {
-            await this.db.query(`
+            await this.db.run(`
                 UPDATE player_classes 
                 SET unlocked_classes = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE player_id = ?

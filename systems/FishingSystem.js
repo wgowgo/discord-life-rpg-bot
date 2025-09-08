@@ -186,7 +186,7 @@ class FishingSystem {
 
     async initializeFishingSystem() {
         // 낚시 테이블들 생성
-        await this.db.query(`
+        await this.db.run(`
             CREATE TABLE IF NOT EXISTS player_fishing (
                 player_id TEXT PRIMARY KEY,
                 fishing_level INTEGER DEFAULT 1,
@@ -201,7 +201,7 @@ class FishingSystem {
             )
         `);
 
-        await this.db.query(`
+        await this.db.run(`
             CREATE TABLE IF NOT EXISTS player_fishing_rods (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id TEXT NOT NULL,
@@ -211,7 +211,7 @@ class FishingSystem {
             )
         `);
 
-        await this.db.query(`
+        await this.db.run(`
             CREATE TABLE IF NOT EXISTS player_fishing_records (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id TEXT NOT NULL,
@@ -228,24 +228,24 @@ class FishingSystem {
     }
 
     async getPlayerFishingData(playerId) {
-        let result = await this.db.query(
+        let result = await this.db.run(
             'SELECT * FROM player_fishing WHERE player_id = ?',
             [playerId]
         );
 
         if (result.length === 0) {
-            await this.db.query(
+            await this.db.run(
                 'INSERT INTO player_fishing (player_id) VALUES (?)',
                 [playerId]
             );
             
             // 기본 낚시대 지급
-            await this.db.query(
+            await this.db.run(
                 'INSERT INTO player_fishing_rods (player_id, rod_id) VALUES (?, ?)',
                 [playerId, 'basic_rod']
             );
 
-            result = await this.db.query(
+            result = await this.db.run(
                 'SELECT * FROM player_fishing WHERE player_id = ?',
                 [playerId]
             );
@@ -276,7 +276,7 @@ class FishingSystem {
 
         // 낚시 성공 여부 판정
         if (Math.random() * 100 > success_chance) {
-            await this.db.query(
+            await this.db.run(
                 'UPDATE player_fishing SET fishing_energy = fishing_energy - ? WHERE player_id = ?',
                 [locationData.energy_cost, playerId]
             );
@@ -342,7 +342,7 @@ class FishingSystem {
         const expGain = this.calculateExpGain(itemData.rarity);
         
         // 낚시 기록 저장
-        await this.db.query(`
+        await this.db.run(`
             INSERT INTO player_fishing_records 
             (player_id, item_id, item_name, item_rarity, location, rod_used) 
             VALUES (?, ?, ?, ?, ?, ?)
@@ -367,7 +367,7 @@ class FishingSystem {
         updateQuery += ' WHERE player_id = ?';
         params.push(playerId);
 
-        await this.db.query(updateQuery, params);
+        await this.db.run(updateQuery, params);
 
         // 레벨업 체크
         await this.checkLevelUp(playerId);
@@ -389,7 +389,7 @@ class FishingSystem {
         const requiredExp = fishingData.fishing_level * 100;
         
         if (fishingData.fishing_exp >= requiredExp) {
-            await this.db.query(`
+            await this.db.run(`
                 UPDATE player_fishing 
                 SET fishing_level = fishing_level + 1,
                     fishing_exp = fishing_exp - ?
@@ -417,7 +417,7 @@ class FishingSystem {
         }
 
         // 이미 보유 중인지 확인
-        const existing = await this.db.query(
+        const existing = await this.db.run(
             'SELECT * FROM player_fishing_rods WHERE player_id = ? AND rod_id = ?',
             [playerId, rodId]
         );
@@ -426,7 +426,7 @@ class FishingSystem {
             return { success: false, message: '이미 보유 중인 낚시대입니다.' };
         }
 
-        await this.db.query(
+        await this.db.run(
             'INSERT INTO player_fishing_rods (player_id, rod_id) VALUES (?, ?)',
             [playerId, rodId]
         );

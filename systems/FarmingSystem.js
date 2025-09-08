@@ -129,7 +129,7 @@ class FarmingSystem {
 
     async initializeFarmingSystem() {
         // 농업 테이블들 생성
-        await this.db.query(`
+        await this.db.run(`
             CREATE TABLE IF NOT EXISTS player_farming (
                 player_id TEXT PRIMARY KEY,
                 farming_level INTEGER DEFAULT 1,
@@ -144,7 +144,7 @@ class FarmingSystem {
             )
         `);
 
-        await this.db.query(`
+        await this.db.run(`
             CREATE TABLE IF NOT EXISTS player_farm_plots (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id TEXT NOT NULL,
@@ -157,7 +157,7 @@ class FarmingSystem {
             )
         `);
 
-        await this.db.query(`
+        await this.db.run(`
             CREATE TABLE IF NOT EXISTS player_farming_tools (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id TEXT NOT NULL,
@@ -167,7 +167,7 @@ class FarmingSystem {
             )
         `);
 
-        await this.db.query(`
+        await this.db.run(`
             CREATE TABLE IF NOT EXISTS player_crop_records (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id TEXT NOT NULL,
@@ -183,19 +183,19 @@ class FarmingSystem {
     }
 
     async getPlayerFarmingData(playerId) {
-        let result = await this.db.query(
+        let result = await this.db.all(
             'SELECT * FROM player_farming WHERE player_id = ?',
             [playerId]
         );
 
         if (result.length === 0) {
-            await this.db.query(
+            await this.db.run(
                 'INSERT INTO player_farming (player_id) VALUES (?)',
                 [playerId]
             );
             
             // 기본 도구 지급
-            await this.db.query(
+            await this.db.run(
                 'INSERT INTO player_farming_tools (player_id, tool_id) VALUES (?, ?)',
                 [playerId, 'basic_hoe']
             );
@@ -203,13 +203,13 @@ class FarmingSystem {
             // 기본 농장 구역 초기화
             const basicLand = this.farmLands.find(land => land.id === 'basic_plot');
             for (let i = 1; i <= basicLand.slots; i++) {
-                await this.db.query(
+                await this.db.run(
                     'INSERT INTO player_farm_plots (player_id, slot_number) VALUES (?, ?)',
                     [playerId, i]
                 );
             }
 
-            result = await this.db.query(
+            result = await this.db.all(
                 'SELECT * FROM player_farming WHERE player_id = ?',
                 [playerId]
             );
@@ -231,7 +231,7 @@ class FarmingSystem {
         }
 
         // 구역 확인
-        const plot = await this.db.query(
+        const plot = await this.db.get(
             'SELECT * FROM player_farm_plots WHERE player_id = ? AND slot_number = ?',
             [playerId, slotNumber]
         );
@@ -257,7 +257,7 @@ class FarmingSystem {
         const plantedAt = new Date();
         const readyAt = new Date(plantedAt.getTime() + modifiedGrowthTime * 60000);
 
-        await this.db.query(`
+        await this.db.run(`
             UPDATE player_farm_plots 
             SET crop_id = ?, planted_at = ?, ready_at = ?, is_ready = 0 
             WHERE player_id = ? AND slot_number = ?
@@ -273,16 +273,16 @@ class FarmingSystem {
     }
 
     async harvestCrop(playerId, slotNumber) {
-        const plot = await this.db.query(
+        const plot = await this.db.get(
             'SELECT * FROM player_farm_plots WHERE player_id = ? AND slot_number = ?',
             [playerId, slotNumber]
         );
 
-        if (plot.length === 0 || !plot[0].crop_id) {
+        if (!plot || !plot.crop_id) {
             return { success: false, message: '심어진 작물이 없습니다.' };
         }
 
-        const readyTime = new Date(plot[0].ready_at);
+        const readyTime = new Date(plot.ready_at);
         const now = new Date();
 
         if (now < readyTime) {
@@ -290,7 +290,7 @@ class FarmingSystem {
             return { success: false, message: `아직 수확할 수 없습니다. ${remainingTime}분 후에 수확 가능합니다.` };
         }
 
-        const crop = this.crops.find(c => c.id === plot[0].crop_id);
+        const crop = this.crops.find(c => c.id === plot.crop_id);
         if (!crop) {
             return { success: false, message: '알 수 없는 작물입니다.' };
         }
@@ -311,7 +311,7 @@ class FarmingSystem {
         await this.updateFarmingStats(playerId, crop, totalQuantity);
 
         // 구역 초기화
-        await this.db.query(`
+        await this.db.run(`
             UPDATE player_farm_plots 
             SET crop_id = NULL, planted_at = NULL, ready_at = NULL, is_ready = 0 
             WHERE player_id = ? AND slot_number = ?
@@ -331,7 +331,7 @@ class FarmingSystem {
         const expGain = crop.exp_gain;
         
         // 수확 기록 저장
-        await this.db.query(`
+        await this.db.run(`
             INSERT INTO player_crop_records 
             (player_id, crop_id, crop_name, crop_rarity, quantity) 
             VALUES (?, ?, ?, ?, ?)
@@ -355,7 +355,7 @@ class FarmingSystem {
         updateQuery += ' WHERE player_id = ?';
         params.push(playerId);
 
-        await this.db.query(updateQuery, params);
+        await this.db.run(updateQuery, params);
 
         // 레벨업 체크
         await this.checkLevelUp(playerId);
@@ -366,7 +366,7 @@ class FarmingSystem {
         const requiredExp = farmingData.farming_level * 150; // 농업은 낚시보다 경험치 더 필요
         
         if (farmingData.farming_exp >= requiredExp) {
-            await this.db.query(`
+            await this.db.run(`
                 UPDATE player_farming 
                 SET farming_level = farming_level + 1,
                     farming_exp = farming_exp - ?
@@ -379,7 +379,7 @@ class FarmingSystem {
     }
 
     async getFarmStatus(playerId) {
-        const plots = await this.db.query(
+        const plots = await this.db.all(
             'SELECT * FROM player_farm_plots WHERE player_id = ? ORDER BY slot_number',
             [playerId]
         );
