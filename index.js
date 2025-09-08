@@ -183,24 +183,24 @@ class LifeRPGBot {
      */
     async sendWelcomeDM(member) {
         try {
-            const welcomeEmbed = {
+                const welcomeEmbed = {
                 title: '🎮 Discord Life RPG에 오신 것을 환영합니다!',
                 description: `안녕하세요, **${member.displayName}**님!\n${member.guild.name} 서버의 Life RPG 게임에 참여하셨습니다.`,
                 color: 0x00ff00,
                 fields: [
                     {
-                        name: '🚀 시작하기',
-                        value: '서버에서 `/프로필` 명령어를 사용하여 게임을 시작하세요!\n프로필을 등록하면 개인 전용 채널을 만들어드립니다.',
+                        name: '🎯 튜토리얼 시작하기',
+                        value: '**1단계:** `/프로필 등록` - 게임에 참여하기 위해 프로필을 등록하세요!\n**2단계:** 개인 채널이 자동으로 생성됩니다\n**3단계:** 개인 채널에서 상세한 게임 가이드를 확인하세요!',
                         inline: false
                     },
                     {
-                        name: '🎯 게임 특징',
+                        name: '🎮 게임 특징',
                         value: '• 인생 시뮬레이션 + RPG 요소\n• 직업, 투자, 펫 시스템\n• 던전 탐험과 전투\n• 플레이어 간 거래와 길드',
                         inline: false
                     },
                     {
-                        name: '💡 도움말',
-                        value: '`/도움말` 명령어로 더 자세한 정보를 확인할 수 있습니다!',
+                        name: '📚 튜토리얼 & 도움말',
+                        value: '• `/도움말` - 게임의 모든 기능과 명령어 가이드\n• 개인 채널 - 상세한 게임 튜토리얼과 팁\n• 단계별 가이드로 쉽게 시작할 수 있습니다!',
                         inline: false
                     }
                 ],
@@ -533,8 +533,8 @@ class LifeRPGBot {
             .setColor(0xFF6B6B)
             .addFields(
                 {
-                    name: '1️⃣ 캐릭터 확인',
-                    value: '`/프로필` - 내 캐릭터 정보와 스탯 확인',
+                    name: '1️⃣ 캐릭터 등록',
+                    value: '`/프로필 등록` - 게임 참여를 위해 프로필 등록',
                     inline: true
                 },
                 {
@@ -575,7 +575,7 @@ class LifeRPGBot {
             .addFields(
                 {
                     name: '프로필 관련',
-                    value: '`/프로필 [유저]` - 캐릭터 정보 확인\n`/프로필 초기화` - 데이터 초기화 (2단계 확인)',
+                    value: '`/프로필 등록` - 게임 참여를 위해 프로필 등록\n`/프로필 보기 [유저]` - 캐릭터 정보 확인\n`/프로필 초기화` - 데이터 초기화 (1단계 확인)',
                     inline: false
                 },
                 {
@@ -701,7 +701,7 @@ class LifeRPGBot {
             .addFields(
                 {
                     name: '🎯 초보자 추천 순서',
-                    value: '1. `/프로필`로 캐릭터 확인\n2. `/직업 지원`으로 직업 구하기\n3. 채팅으로 돈과 경험치 벌기\n4. `/상점 목록`에서 아이템 구매\n5. `/던전 목록`으로 모험 시작',
+                    value: '1. `/프로필 등록`으로 게임 참여\n2. `/직업 목록`에서 직업 구하기\n3. 채팅으로 돈과 경험치 벌기\n4. `/상점 목록`에서 아이템 구매\n5. `/던전 목록`으로 모험 시작',
                     inline: false
                 },
                 {
