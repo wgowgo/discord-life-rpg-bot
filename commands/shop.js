@@ -59,7 +59,7 @@ module.exports = {
             }
 
             // 다른 명령어들은 회원가입 필요
-            const player = await db.get('SELECT * FROM players WHERE id = ?', [userId]);
+            const player = await client.db.get('SELECT * FROM players WHERE id = ?', [userId]);
             if (!player) {
                 const embed = new (require('discord.js').EmbedBuilder)()
                     .setColor('#ff0000')
@@ -99,17 +99,7 @@ module.exports = {
     async handleShopList(interaction, client) {
         const category = interaction.options.getString('카테고리');
         
-        let sql = 'SELECT * FROM items WHERE price > 0';
-        let params = [];
-        
-        if (category) {
-            sql += ' AND category = ?';
-            params.push(category);
-        }
-        
-        sql += ' ORDER BY category, rarity DESC, price ASC';
-        
-        const items = await db.all(sql, params);
+        const items = await client.shopSystem.getShopItems(category);
 
         if (items.length === 0) {
             const embed = new EmbedBuilder()
@@ -130,17 +120,7 @@ module.exports = {
             'special': '✨'
         };
 
-        const paginatedData = paginationSystem.createPaginatedEmbed(
-            items,
-            paginationSystem.formatShopItem.bind(paginationSystem),
-            {
-                title: '🛒 상점',
-                color: 0x0099ff,
-                itemsPerPage: 8,
-                category: 'category',
-                categoryEmojis: categoryEmojis
-            }
-        );
+        const embed = client.shopSystem.createShopEmbed(items, category);
 
         const response = {
             embeds: [paginatedData.embed],
@@ -183,7 +163,7 @@ module.exports = {
             });
         }
 
-        await interaction.reply(response);
+        await interaction.reply({ embeds: [embed] });
     },
 
     async handleBuy(interaction, client, userId) {
@@ -221,7 +201,7 @@ module.exports = {
         }
 
         // 구매 처리
-        const playerManager = new Player(db);
+        const playerManager = client.player;
         await playerManager.addItem(userId, itemId, quantity);
 
         // 자금 차감
@@ -254,7 +234,7 @@ module.exports = {
     },
 
     async handleInventory(interaction, client, userId) {
-        const playerManager = new Player(db);
+        const playerManager = client.player;
         const inventory = await playerManager.getInventory(userId);
 
         const embed = new EmbedBuilder()
@@ -311,7 +291,7 @@ module.exports = {
     async handleUse(interaction, client, userId) {
         const itemId = interaction.options.getInteger('아이템id');
 
-        const playerManager = new Player(db);
+        const playerManager = client.player;
         const result = await playerManager.useItem(userId, itemId);
 
         const embed = new EmbedBuilder()
